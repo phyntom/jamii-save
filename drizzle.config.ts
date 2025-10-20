@@ -1,17 +1,18 @@
-import dotenv from "dotenv"
-dotenv.config()
-import { defineConfig } from "drizzle-kit";
-import { Config } from "drizzle-kit";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+import { type Config, defineConfig } from "drizzle-kit";
 
 export default defineConfig({
-  out: "./drizzle",
-  schema: "./database/schema.ts",
-  dialect:'postgresql',
+  out: "./src/drizzle/migrations",
+  schema: "./src/drizzle/schemas/*",
+  dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
   migrations: {
-    table: "jamii-migrations-table",
+    table: "migrations-table",
     schema: "jamii",
   },
 }) satisfies Config;
