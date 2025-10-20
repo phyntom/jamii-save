@@ -3,14 +3,17 @@
 ## ✅ Completed Steps
 
 ### 1. Installation
+
 - Installed `better-auth@1.3.26` using bun
 
 ### 2. Configuration Files Created
+
 - **`lib/auth-config.ts`** - Server-side better-auth configuration
 - **`lib/auth-client.ts`** - Client-side auth helpers
 - **`app/api/auth/[...all]/route.ts`** - API route handler for better-auth
 
 ### 3. Database Schema Updated
+
 - Changed table name from `jamii.users` to `jamii.user` (better-auth convention)
 - Added better-auth required tables:
   - `jamii.session` - User sessions
@@ -20,6 +23,7 @@
 - Added appropriate indexes for performance
 
 ### 4. Code Updates
+
 - **`lib/auth.ts`** - Simplified to use better-auth API
 - **`app/actions/auth.ts`** - Updated signUp, signIn, signOut to use better-auth
 - **`middleware.ts`** - Updated to use better-auth session checking
@@ -35,12 +39,15 @@
 ## 🚀 Next Steps
 
 ### 1. Install Dependencies
+
 ```bash
 bun install
 ```
 
 ### 2. Update Environment Variables
+
 Add to your `.env.local`:
+
 ```env
 DATABASE_URL=your_neon_database_url
 BETTER_AUTH_SECRET=your_secret_key_here
@@ -49,11 +56,13 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 Generate a secret:
+
 ```bash
 openssl rand -base64 32
 ```
 
 ### 3. Recreate Database Schema
+
 ```bash
 # Drop and recreate the schema (WARNING: This will delete all data)
 psql $DATABASE_URL -c "DROP SCHEMA IF EXISTS jamii CASCADE;"
@@ -62,11 +71,13 @@ psql $DATABASE_URL -f scripts/002_seed_plans.sql
 ```
 
 ### 4. Test the Integration
+
 ```bash
 bun dev
 ```
 
 Visit:
+
 - `/sign-up` - Test user registration
 - `/sign-in` - Test user login
 - `/dashboard` - Should redirect if not authenticated
@@ -74,12 +85,15 @@ Visit:
 ## 📝 Key Changes
 
 ### Authentication Flow
+
 **Before (Custom JWT):**
+
 - Manual password hashing with bcryptjs
 - Custom JWT token generation with jose
 - Manual session management with cookies
 
 **After (Better-Auth):**
+
 - Better-auth handles password hashing automatically
 - Built-in session management
 - Support for OAuth providers (ready to add)
@@ -88,33 +102,37 @@ Visit:
 ### API Usage
 
 **Sign Up:**
+
 ```typescript
 await auth.api.signUpEmail({
   body: { name, email, password },
   headers: await headers(),
-})
+});
 ```
 
 **Sign In:**
+
 ```typescript
 await auth.api.signInEmail({
   body: { email, password },
   headers: await headers(),
-})
+});
 ```
 
 **Get Session:**
+
 ```typescript
 const session = await auth.api.getSession({
   headers: await headers(),
-})
+});
 ```
 
 **Sign Out:**
+
 ```typescript
 await auth.api.signOut({
   headers: await headers(),
-})
+});
 ```
 
 ## 🔧 Additional Features Available
