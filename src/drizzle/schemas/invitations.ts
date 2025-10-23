@@ -1,7 +1,7 @@
 import { integer, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { nanoid } from 'nanoid';
 import { user } from './auth';
-import { communities } from './communities';
+import { community } from './community';
 import { baseSchema } from './base-schema';
 
 export const invitationStatusEnum = baseSchema.enum('invitation_status', [
@@ -11,13 +11,13 @@ export const invitationStatusEnum = baseSchema.enum('invitation_status', [
 ]);
 export const invitationTypeEnum = baseSchema.enum('invitation_type', ['email', 'link', 'code']);
 
-export const invitations = baseSchema.table('invitations', {
+export const invitation = baseSchema.table('invitation', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => nanoid()),
   community_id: text('community_id')
     .notNull()
-    .references(() => communities.id, { onDelete: 'cascade' }),
+    .references(() => community.id, { onDelete: 'cascade' }),
   invitation_type: invitationTypeEnum('invitation_type').notNull().default('email'),
   email: text('email'),
   code: text('code'),

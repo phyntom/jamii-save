@@ -52,7 +52,7 @@ export function SignUpForm() {
     const result = await authClient.signUp.email({ ...data, callbackURL: '' }, {
       onSuccess: () => {
         setIsLoading(false);
-        router.push('/');
+        router.push(`/verify-email?email=${data.email}`);
       },
       onError: (ctx) => {
         setError(ctx.error?.message as string);

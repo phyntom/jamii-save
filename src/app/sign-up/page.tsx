@@ -1,11 +1,15 @@
+import AuthBackgroundShape from '@/assets/svg/auth-background-shape';
 import { SignUpForm } from '@/components/auth/sign-up-form';
 import { Logo } from '@/components/commons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md">
+    <div className='relative flex h-auto min-h-screen items-center justify-center overflow-x-hidden px-4 py-10 sm:px-6 lg:px-8'>
+      <div className='absolute'>
+        <AuthBackgroundShape />
+      </div>
+      <Card className="z-1 w-full border-none shadow-md sm:max-w-md">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
             <Logo size="lg" />
