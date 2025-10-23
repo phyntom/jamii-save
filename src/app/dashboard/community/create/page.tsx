@@ -10,14 +10,14 @@ export default async function CreateGroupPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Create a Group</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Create a Community</h1>
         <p className="text-muted-foreground">Set up a new savings group for your community</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Group Details</CardTitle>
-          <CardDescription>Enter the information for your new savings group</CardDescription>
+          <CardTitle>Community Details</CardTitle>
+          <CardDescription>Enter the information for community</CardDescription>
         </CardHeader>
         <CardContent>
           <CreateCommunityForm />

@@ -1,19 +1,19 @@
 import { pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { nanoid } from 'nanoid';
 import { user } from './auth';
-import { communities } from './communities';
+import { community } from './community';
 import { baseSchema } from './base-schema';
 
 export const memberRoleEnum = baseSchema.enum('member_role', ['super_admin', 'admin', 'member']);
 export const memberStatusEnum = baseSchema.enum('member_status', ['active', 'pending', 'removed']);
 
-export const members = baseSchema.table('members', {
+export const member = baseSchema.table('member', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => nanoid()),
   community_id: text('community_id')
     .notNull()
-    .references(() => communities.id, { onDelete: 'cascade' }),
+    .references(() => community.id, { onDelete: 'cascade' }),
   user_id: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),

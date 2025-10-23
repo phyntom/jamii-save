@@ -2,7 +2,7 @@
 
 import { UserPlus } from 'lucide-react';
 import { useState } from 'react';
-import { inviteMember } from '@/app/actions/groups';
+import { inviteMember } from '@/app/actions/community';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
