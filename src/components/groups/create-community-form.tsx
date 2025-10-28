@@ -39,6 +39,7 @@ import {
   FormMessage,
   FormDescription,
 } from '@/components/ui/form';
+import { FieldGroup } from '../ui/field';
 import { useSession } from '@/lib/auth-client';
 
 export const createCommunitySchema = z.object({
@@ -116,226 +117,228 @@ export function CreateCommunityForm() {
   }, []);
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      <FieldGroup>
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Community Name *</FormLabel>
-              <FormControl>
-                <Input type="text" placeholder="Family Savings Group" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FieldGroup>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Community Name *</FormLabel>
+                <FormControl>
+                  <Input type="text" placeholder="Family Savings Group" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea placeholder="A brief description of your savings group" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </FieldGroup>
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
           <FormField
             control={form.control}
-            name="visibility"
+            name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Visibility</FormLabel>
+                <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Select name="visibility" disabled={loading} onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select visibility" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="private">Private</SelectItem>
-                      <SelectItem value="unlisted">Unlisted</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Textarea placeholder="A brief description of your savings group" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+        </FieldGroup>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="visibility"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Visibility</FormLabel>
+                  <FormControl>
+                    <Select name="visibility" disabled={loading} onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select visibility" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="public">Public</SelectItem>
+                        <SelectItem value="private">Private</SelectItem>
+                        <SelectItem value="unlisted">Unlisted</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="contribution_frequency"
+              defaultValue="weekly"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contribution Frequency *</FormLabel>
+                  <FormControl>
+                    <Select name="contributionFrequency" disabled={loading}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="annual">Annual</SelectItem>
+                        <SelectItem value="one-time">One-time</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="country"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Country *</FormLabel>
+                  <FormControl>
+                    <Select name="country" disabled={loading}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select currency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="CANADA">CANADA</SelectItem>
+                        <SelectItem value="UNITED_STATES">UNITED_STATES</SelectItem>
+                        <SelectItem value="UNITED_KINGDOM">UNITED_KINGDOM</SelectItem>
+                        <SelectItem value="EUROZONE">EUROZONE</SelectItem>
+                        <SelectItem value="KENYA">KENYA</SelectItem>
+                        <SelectItem value="NIGERIA">NIGERIA</SelectItem>
+                        <SelectItem value="SOUTH_AFRICA">SOUTH_AFRICA</SelectItem>
+                        <SelectItem value="GHANA">GHANA</SelectItem>
+                        <SelectItem value="TANZANIA">TANZANIA</SelectItem>
+                        <SelectItem value="UGANDA">UGANDA</SelectItem>
+                        <SelectItem value="RWANDA">RWANDA</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="currency"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Currency *</FormLabel>
+                  <FormControl>
+                    <Select name="currency" disabled={loading}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select currency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                        <SelectItem value="KES">KES</SelectItem>
+                        <SelectItem value="NGN">NGN</SelectItem>
+                        <SelectItem value="ZAR">ZAR</SelectItem>
+                        <SelectItem value="GHS">GHS</SelectItem>
+                        <SelectItem value="TZS">TZS</SelectItem>
+                        <SelectItem value="UGX">UGX</SelectItem>
+                        <SelectItem value="RWF">RWF</SelectItem>
+                        <SelectItem value="CAD">CAD</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="plan_type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Plan Type *</FormLabel>
+                  <FormControl>
+                    <Select name="planType" disabled={loading}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select plan type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {plans?.map((plan) => (
+                          <SelectItem key={plan.id} value={plan.id.toString()}>
+                            {plan.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="community_start_date"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Community Start Date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={'outline'}
+                          className={cn(
+                            'w-full pl-3 text-left font-normal',
+                            !field.value && 'text-muted-foreground',
+                          )}
+                        >
+                          {field.value ? format(field.value, 'PP') : <span>Pick a date</span>}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date < new Date('1900-01-01')}
+                        autoFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormDescription>
+                    When will contributions start for this community?
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
-        <div className="space-y-2">
-          <FormField
-            control={form.control}
-            name="contribution_frequency"
-            defaultValue="weekly"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contribution Frequency *</FormLabel>
-                <FormControl>
-                  <Select name="contributionFrequency" disabled={loading}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select frequency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="annual">Annual</SelectItem>
-                      <SelectItem value="one-time">One-time</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="space-y-2">
-          <FormField
-            control={form.control}
-            name="country"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Country *</FormLabel>
-                <FormControl>
-                  <Select name="country" disabled={loading}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CANADA">CANADA</SelectItem>
-                      <SelectItem value="UNITED_STATES">UNITED_STATES</SelectItem>
-                      <SelectItem value="UNITED_KINGDOM">UNITED_KINGDOM</SelectItem>
-                      <SelectItem value="EUROZONE">EUROZONE</SelectItem>
-                      <SelectItem value="KENYA">KENYA</SelectItem>
-                      <SelectItem value="NIGERIA">NIGERIA</SelectItem>
-                      <SelectItem value="SOUTH_AFRICA">SOUTH_AFRICA</SelectItem>
-                      <SelectItem value="GHANA">GHANA</SelectItem>
-                      <SelectItem value="TANZANIA">TANZANIA</SelectItem>
-                      <SelectItem value="UGANDA">UGANDA</SelectItem>
-                      <SelectItem value="RWANDA">RWANDA</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="space-y-2">
-          <FormField
-            control={form.control}
-            name="currency"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Currency *</FormLabel>
-                <FormControl>
-                  <Select name="currency" disabled={loading}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                      <SelectItem value="KES">KES</SelectItem>
-                      <SelectItem value="NGN">NGN</SelectItem>
-                      <SelectItem value="ZAR">ZAR</SelectItem>
-                      <SelectItem value="GHS">GHS</SelectItem>
-                      <SelectItem value="TZS">TZS</SelectItem>
-                      <SelectItem value="UGX">UGX</SelectItem>
-                      <SelectItem value="RWF">RWF</SelectItem>
-                      <SelectItem value="CAD">CAD</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="space-y-2">
-          <FormField
-            control={form.control}
-            name="plan_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Plan Type *</FormLabel>
-                <FormControl>
-                  <Select name="planType" disabled={loading}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select plan type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {plans?.map((plan) => (
-                        <SelectItem key={plan.id} value={plan.id.toString()}>
-                          {plan.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="space-y-2">
-          <FormField
-            control={form.control}
-            name="community_start_date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Community Start Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={'outline'}
-                        className={cn(
-                          'w-full pl-3 text-left font-normal',
-                          !field.value && 'text-muted-foreground',
-                        )}
-                      >
-                        {field.value ? format(field.value, 'PP') : <span>Pick a date</span>}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => date < new Date('1900-01-01')}
-                      autoFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormDescription>
-                  When will contributions start for this community?
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </div>
 
-      <div className="flex gap-4">
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Creating...' : 'Create Community'}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()} disabled={loading}>
-          Cancel
-        </Button>
-      </div>
-    </form>
+        <div className="flex gap-4">
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Creating...' : 'Create Community'}
+          </Button>
+          <Button type="button" variant="outline" onClick={() => router.back()} disabled={loading}>
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

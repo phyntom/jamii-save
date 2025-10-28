@@ -33,10 +33,10 @@ export default async function ContributionsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${Number(contributionStats.total_approved).toFixed(2)}
+              ${contributionStats ? Number(contributionStats.total_approved).toFixed(2) : 0.00}
             </div>
             <p className="text-xs text-muted-foreground">
-              {contributionStats.approved_count} contributions
+              {contributionStats ? contributionStats.approved_count : 0} contributions
             </p>
           </CardContent>
         </Card>
@@ -47,7 +47,7 @@ export default async function ContributionsPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{contributionStats.pending_count}</div>
+            <div className="text-2xl font-bold">{contributionStats ? contributionStats.pending_count : 0}</div>
             <p className="text-xs text-muted-foreground">Awaiting review</p>
           </CardContent>
         </Card>
@@ -61,8 +61,8 @@ export default async function ContributionsPage() {
             <div className="text-2xl font-bold">
               {contributions.length > 0
                 ? Math.round(
-                    (Number(contributionStats.approved_count) / contributions.length) * 100,
-                  )
+                  (Number(contributionStats.approved_count) / contributions.length) * 100,
+                )
                 : 0}
               %
             </div>
