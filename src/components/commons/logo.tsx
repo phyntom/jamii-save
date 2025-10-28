@@ -56,8 +56,8 @@ export function Logo({
     'font-bold',
     textSizeClasses[size],
     variant === 'white' && 'text-white',
-    variant === 'dark' && 'text-gray-900',
-    variant === 'default' && 'text-gray-900',
+    variant === 'dark' && 'text-foreground',
+    variant === 'default' && 'text-gray-900 dark:text-foreground',
   );
 
   return (
