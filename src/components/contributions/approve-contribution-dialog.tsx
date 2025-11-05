@@ -2,7 +2,7 @@
 
 import { Check, X } from 'lucide-react';
 import { useState } from 'react';
-import { approveContribution } from '@/app/actions/contributions';
+import { approveContribution } from '@/server/contributions';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {

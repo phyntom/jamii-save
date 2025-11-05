@@ -9,11 +9,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { authClient } from '@/lib/auth-client';
 import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field';
+import { checkEmailExists } from '@/server/authentication';
 
 const forgetPassword = z.object({
   email: z.string().email(),
@@ -21,6 +22,8 @@ const forgetPassword = z.object({
 
 export function ForgotPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
   const [isLoading, setIsLoading] = useState(false);
+  const [disableResend, setDisableResend] = useState(false);
+  const [countDown, setCountDown] = useState(0);
 
   const form = useForm({
     resolver: zodResolver(forgetPassword),
@@ -32,18 +35,45 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
   async function onSubmit(values: z.infer<typeof forgetPassword>) {
     setIsLoading(true);
 
+    const emailExist = await checkEmailExists(values.email);
+    if (!emailExist) {
+      toast.error("Email does not exist");
+      setIsLoading(false);
+      return;
+    }
+
     const { error } = await authClient.forgetPassword({
       email: values.email,
       redirectTo: '/reset-password',
     });
-    console.log(error);
+    console.error("error", error);
+
     if (error) {
-      toast.error(error.message);
+      toast.error("Failed to send password reset email");
     } else {
       toast.success('Password reset email sent');
+      setCountDown(30);
+      setDisableResend(true);
     }
     setIsLoading(false);
   }
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (disableResend && countDown > 0) {
+      timer = setInterval(() => {
+        setCountDown((prev) => prev - 1);
+      }, 1000);
+    }
+    else if (countDown === 0 && disableResend) {
+      setDisableResend(false);
+    }
+    return () => {
+      // Defensive: only clear if timer exists
+      if (typeof timer !== "undefined") clearInterval(timer);
+    };
+  }, [countDown, disableResend]);
+
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -78,8 +108,8 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                 <Button variant="outline" asChild className="w-[20%]">
                   <Link href="/sign-in">Back</Link>
                 </Button>
-                <Button type="submit" className="w-[80%]" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="size-4 animate-spin" /> : 'Reset Password'}
+                <Button type="submit" className="w-[80%]" disabled={isLoading || disableResend}>
+                  {isLoading ? <Loader2 className="size-4 animate-spin" /> : disableResend ? `Resend in ${countDown} seconds` : 'Reset Password'}
                 </Button>
               </Field>
             </div>

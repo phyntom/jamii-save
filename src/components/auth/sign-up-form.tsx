@@ -1,7 +1,6 @@
 'use client';
 import Link from 'next/link';
 import { useState } from 'react';
-import { signUp } from '@/app/actions/auth';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +30,11 @@ const signUpSchema = z.object({
 
 type SignUpFormType = z.infer<typeof signUpSchema>
 
-export function SignUpForm() {
+interface SignUpFormProps {
+  redirectUrl?: string;
+}
+
+export function SignUpForm({ redirectUrl }: SignUpFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -49,7 +52,7 @@ export function SignUpForm() {
     setError(null);
 
 
-    const result = await authClient.signUp.email({ ...data, callbackURL: '' }, {
+    const { error } = await authClient.signUp.email({ ...data, callbackURL: '' }, {
       onSuccess: () => {
         setIsLoading(false);
         router.push(`/verify-email?email=${data.email}`);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { recordContribution } from '@/app/actions/contributions';
+import { recordContribution } from '@/server/contributions';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
