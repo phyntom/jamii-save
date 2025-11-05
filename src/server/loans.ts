@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { getSession } from '@/app/actions/auth';
+import { getSession } from '@/server/authentication';
 import { sql } from '@/lib/db';
 
 const requestLoanSchema = z.object({

@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { authClient } from '@/lib/auth-client';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui/card';
 import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 const resetPasswordSchema = z.object({
     password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -34,6 +35,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
     const [isLoading, setIsLoading] = useState(false);
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
+    const error = searchParams.get('error');
     const router = useRouter();
     const form = useForm({
         resolver: zodResolver(resetPasswordSchema),
@@ -42,19 +44,48 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
             confirmPassword: '',
         },
     });
+
+
     async function onSubmit(values: ResetPasswordFormType) {
         setIsLoading(true);
         const { error } = await authClient.resetPassword({
             newPassword: values.password,
-            token: token ?? '',
+            token: token as string,
         });
+
         if (error) {
+            if (error.code === 'invalid_token'.toUpperCase()) {
+                toast.error('Invalid reset password link');
+                router.push('/forgot-password');
+                return;
+            }
             toast.error(error.message);
         } else {
             toast.success('Password reset successfully');
             router.push('/sign-in');
         }
         setIsLoading(false);
+    }
+
+    if (!token || error !== null) {
+        return (
+            <div className={cn('flex flex-col gap-6', className)} {...props}>
+                <Card>
+                    <CardHeader className="text-center">
+                        <CardTitle className="text-xl text-destructive">Invalid Reset Password Link</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-destructive">The reset password link is invalid or has expired. Please request a new reset password link.</p>
+                        <p className="text-sm text-destructive">An error occurred while resetting your password</p>
+                    </CardContent>
+                    <CardFooter>
+                        <Button variant="outline" asChild className="mx-auto w-[50%]">
+                            <Link href="/sign-in">Back</Link>
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </div >
+        );
     }
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -64,7 +95,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                     <CardDescription>Enter your email to reset your password</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <form id="reset-password-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                         <FieldGroup>
                             <Controller
                                 name="password"
@@ -105,7 +136,11 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                         </FieldGroup>
                         <Field orientation="horizontal">
                             <Button type="submit" className="mx-auto w-[50%]" disabled={isLoading}>
-                                {isLoading ? <Loader2 className="size-4 animate-spin" /> : 'Reset Password'}
+                                {isLoading ? (
+                                    <Loader2 className="size-4 animate-spin" />) :
+                                    (
+                                        'Reset Password'
+                                    )}
                             </Button>
                         </Field>
                     </form>

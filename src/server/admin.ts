@@ -1,6 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import { cookies } from 'next/headers';
-import { verifyToken } from '@/app/actions/auth';
+import { verifyToken } from '@/server/authentication';
 
 const sql = neon(process.env.DATABASE_URL!);
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { requestLoan } from '@/app/actions/loans';
+import { requestLoan } from '@/server/loans';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
