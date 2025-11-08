@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export async function DashboardHeader() {
   const session = await getSession();
@@ -27,9 +28,12 @@ export async function DashboardHeader() {
   return (
     <header className="border-b bg-background">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/dashboard">
-          <Logo size="default" />
-        </Link>
+        <div className='flex gap-1'>
+          <SidebarTrigger className='lg:hidden' />
+          <Link href="/dashboard">
+            <Logo size="default" />
+          </Link>
+        </div>
 
         <nav className="hidden md:flex items-center gap-6">
           <Link href="/dashboard" className="text-sm font-medium hover:text-amber-500">
