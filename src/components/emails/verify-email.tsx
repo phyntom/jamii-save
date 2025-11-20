@@ -18,7 +18,7 @@ const VerifyEmail = ({ email }: { email: string }) => {
         }, {
             onSuccess: () => {
                 toast.success('Verification email sent');
-                router.push("/dashboard")
+                router.push("/dashboard/community")
             },
             onError: (ctx) => {
                 toast.error(ctx.error.message);

@@ -71,10 +71,10 @@ export async function getCommunities() {
   }
   const { user } = userSession;
   const userCommunities = await auth.api.listOrganizations({
-    headers: await headers(),
     query: {
       userId: user.id,
     },
+    headers: await headers(),
   });
   if (userCommunities.length === 0) {
     return { success: true, message: 'No organizations found', data: [] };

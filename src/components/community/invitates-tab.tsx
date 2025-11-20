@@ -16,7 +16,7 @@ import { InviteMemberButton } from "./invite-member-button"
 export function InvitesTab() {
     const { data: activeCommunity } = authClient.useActiveOrganization()
     const pendingInvites = activeCommunity?.invitations?.filter(
-        invite => invite.status === "pending"
+        invite => invite.status != null
     )
 
     function cancelInvitation(invitationId: string) {

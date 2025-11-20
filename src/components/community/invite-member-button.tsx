@@ -52,15 +52,12 @@ export function InviteMemberButton({ communityId }: InviteMemberButtonProps) {
         role: "member",
         organizationId: communityId,
       });
-      console.error("error", error);
       if (error) {
         toast.error(error.message);
-        return;
       }
-
       setIsLoading(false);
       toast.success("Invitation sent to member");
-      router.refresh();
+      setOpen(false)
     } catch (error) {
       toast.error("Failed to invite member to organization");
       console.error(error);

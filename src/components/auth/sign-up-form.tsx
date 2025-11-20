@@ -50,12 +50,10 @@ export function SignUpForm({ redirectUrl }: SignUpFormProps) {
   async function handleSubmit(data: SignUpFormType) {
     setIsLoading(true);
     setError(null);
-
-
-    const { error } = await authClient.signUp.email({ ...data, callbackURL: '' }, {
+    const { error } = await authClient.signUp.email({ ...data, }, {
       onSuccess: () => {
         setIsLoading(false);
-        router.push(`/verify-email?email=${data.email}`);
+        router.push(`/sign-in?redirect=${redirectUrl || '/sign-in'}`);
       },
       onError: (ctx) => {
         setError(ctx.error?.message as string);

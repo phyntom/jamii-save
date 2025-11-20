@@ -23,6 +23,7 @@ export const auth = betterAuth({
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
       // Replace the callbackURL to redirect to sign-in page
+      console.log('Sending verification email to:', url);
       url = url.replace('callbackURL=/', 'callbackURL=/sign-in');
       resend.emails.send({
         from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,

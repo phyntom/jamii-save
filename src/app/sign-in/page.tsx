@@ -1,15 +1,14 @@
+"use client";
 import Link from 'next/link';
 import { SignInForm } from '@/components/auth/sign-in-form';
 import { Logo } from '@/components/commons';
 import AuthBackgroundShape from '@/assets/svg/auth-background-shape';
+import { useSearchParams } from 'next/navigation';
 
-interface SignInPageProps {
-  searchParams: Promise<{ redirect?: string }>
-}
 
-export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const params = await searchParams;
-  const redirectUrl = params.redirect || "/dashboard";
+export default async function SignInPage() {
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/dashboard/community";
   return (
     <div className="relative flex h-auto min-h-screen items-center justify-center overflow-x-hidden px-4 py-10 sm:px-6 lg:px-6">
       <div className='absolute'>
@@ -19,7 +18,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         <Link href="#" className="self-center">
           <Logo size="default" />
         </Link>
-        <SignInForm redirectUrl={redirectUrl} />
+        <SignInForm redirectUrl={redirect} />
       </div>
     </div>
   );
