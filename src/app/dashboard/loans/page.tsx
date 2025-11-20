@@ -1,7 +1,7 @@
 import { CreditCard, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getSession } from '@/app/actions/auth';
+import { getSession } from '@/server/authentication';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

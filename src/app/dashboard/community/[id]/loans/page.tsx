@@ -1,7 +1,7 @@
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { getSession } from '@/app/actions/auth';
+import { getSession } from '@/server/authentication';
 import { ApproveLoanDialog } from '@/components/loans/approve-loan-dialog';
 import { RequestLoanForm } from '@/components/loans/request-loan-form';
 import { Badge } from '@/components/ui/badge';

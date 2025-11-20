@@ -2,11 +2,11 @@ import { neon } from '@neondatabase/serverless';
 import { formatDistanceToNow } from 'date-fns';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getAllUsers } from '@/app/actions/admin';
+import { getAllUsers } from '@/server/admin';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { verifyToken } from '@/app/actions/auth';
+import { verifyToken } from '@/server/authentication';
 
 const sql = neon(process.env.DATABASE_URL!);
 

@@ -1,6 +1,6 @@
 import { DollarSign } from 'lucide-react';
 import { redirect } from 'next/navigation';
-import { getSession } from '@/app/actions/auth';
+import { getSession } from '@/server/authentication';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -61,8 +61,8 @@ export default async function ContributionsPage() {
             <div className="text-2xl font-bold">
               {contributions.length > 0
                 ? Math.round(
-                    (Number(contributionStats.approved_count) / contributions.length) * 100,
-                  )
+                  (Number(contributionStats.approved_count) / contributions.length) * 100,
+                )
                 : 0}
               %
             </div>

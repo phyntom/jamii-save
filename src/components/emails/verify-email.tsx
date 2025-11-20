@@ -1,10 +1,39 @@
+"use client"
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-
+import { authClient } from '@/lib/auth-client'
 import AuthBackgroundShape from '@/assets/svg/auth-background-shape'
 import Link from 'next/link'
+import { toast } from 'sonner'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 const VerifyEmail = ({ email }: { email: string }) => {
+    const [countDown, setCountDown] = useState(0);
+    const router = useRouter();
+    async function handleResendEmail() {
+        const { error } = await authClient.sendVerificationEmail({
+            email: email,
+        }, {
+            onSuccess: () => {
+                toast.success('Verification email sent');
+                router.push("/dashboard/community")
+            },
+            onError: (ctx) => {
+                toast.error(ctx.error.message);
+            },
+        });
+    }
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (countDown > 0) {
+            timer = setInterval(() => {
+                setCountDown(countDown - 1);
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, [countDown]);
     return (
         <div className='relative flex h-auto min-h-screen items-center justify-center overflow-x-hidden px-4 py-10 sm:px-6 lg:px-8'>
             <div className='absolute'>
@@ -25,16 +54,9 @@ const VerifyEmail = ({ email }: { email: string }) => {
 
                 <CardContent>
                     <div className='space-y-4'>
-                        <Button className='w-full' asChild>
-                            <Link href={"/sign-in"}>Skip for now</Link>
+                        <Button className='w-full' onClick={async () => await handleResendEmail()} disabled={countDown > 0}>
+                            {countDown > 0 ? `Resend in ${countDown} seconds` : 'Resend Email'}
                         </Button>
-
-                        <p className='text-muted-foreground text-center'>
-                            Didn&apos;t get the mail?{' '}
-                            <a href='#' className='text-card-foreground hover:underline'>
-                                Resend
-                            </a>
-                        </p>
                     </div>
                 </CardContent>
             </Card>

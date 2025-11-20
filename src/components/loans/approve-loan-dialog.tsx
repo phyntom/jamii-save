@@ -2,7 +2,7 @@
 
 import { Check, X } from 'lucide-react';
 import { useState } from 'react';
-import { approveLoan } from '@/app/actions/loans';
+import { approveLoan } from '@/server/loans';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {

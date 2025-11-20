@@ -1,0 +1,1 @@
+ALTER TABLE "jamii"."session" ADD COLUMN "active_organization_id" text;
