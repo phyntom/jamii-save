@@ -1,11 +1,11 @@
-import VerifyEmail from '@/components/emails/verify-email';
+import VerifyEmailTemplate from '@/components/emails/verify-email-template';
+import ResetPasswordTemplate from '@/components/emails/reset-password-template';
 import { db } from '@/drizzle/db';
 import { User } from '@/drizzle/schemas/auth';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
 import { Resend } from 'resend';
-import { redirect } from 'next/navigation';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -15,26 +15,40 @@ export const auth = betterAuth({
   }),
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
-      
+      // Replace the callbackURL to redirect to sign-in page
+      url = url.replace('callbackURL=/', 'callbackURL=/sign-in');
       resend.emails.send({
         from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
         to: user.email,
         subject: 'Verify your email',
-        react: VerifyEmail({ username: user.name, verifyUrl: url }),
+        react: VerifyEmailTemplate({ username: user.name, verifyUrl: url }),
       });
     },
     async afterEmailVerification(user, request) {
       // Your custom logic here, e.g., grant access to premium features
       // Use Next.js redirect server method
-      console.debug("afterEmailVerification", user, request)
+      console.debug('afterEmailVerification', user, request);
     },
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     expiresIn: 3600,
-    callbackURL: '/dashboard', // 1 hour
+    callbackURL: '/sign', // 1 hour
   },
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user, url }) => {
+      // Replace the callbackURL to redirect to sign-in page
+      resend.emails.send({
+        from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+        to: user.email,
+        subject: 'Reset your password',
+        react: ResetPasswordTemplate({
+          username: user.name,
+          resetUrl: url,
+          email: user.email as string,
+        }),
+      });
+    },
     requireEmailVerification: true,
   },
   socialProviders: {

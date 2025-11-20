@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { authClient, useSession } from '@/lib/auth-client';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { usePathname } from 'next/navigation';
 
 const signInSchema = z.object({
 	email: z.string().min(1, 'Email is required'),
@@ -38,12 +39,20 @@ export function SignInForm({ className, ...props }: React.ComponentProps<'div'>)
 		},
 	});
 
+	const pathname = usePathname();
 	useEffect(() => {
 		authClient.getSession().then((session) => {
-			console.debug("session", session)
-			if (!session) router.push('/');
+			// Don't redirect if already on the intended path
+			if (!session && pathname !== '/') {
+				router.push('/');
+				return;
+			}
+			if (session && session?.data?.user?.emailVerified) {
+				router.push('/dashboard');
+			}
 		});
-	}, [router]);
+		// Only depend on router and pathname to avoid unnecessary reruns
+	}, [router, pathname]);
 
 	async function handleSignIn(formData: SignInFormType) {
 		setIsLoading(true);

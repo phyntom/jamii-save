@@ -5,7 +5,6 @@ import { getSession } from '@/app/actions/auth';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { sql } from '@/lib/db';
 
 export default async function GroupsPage() {
   const user = await getSession();
