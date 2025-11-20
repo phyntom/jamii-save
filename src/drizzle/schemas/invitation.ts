@@ -39,12 +39,6 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
   }),
 }));
 
-export type Invitation = typeof invitation.$inferSelect;
-
-// id	string	PK	Unique identifier for each invitation
-// email	string	-	The email address of the user
-// inviterId	string	FK	The ID of the inviter
-// organizationId	string	FK	The ID of the organization
-// role	string	-	The role of the user in the organization
-// status	string	-	The status of the invitation
-// expiresAt	Date	-	Timestamp of when the invitation expires
+export type Invitation = typeof invitation.$inferSelect & {
+  community: typeof community.$inferSelect;
+};

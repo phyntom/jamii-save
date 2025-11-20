@@ -43,36 +43,25 @@ export function SignInForm({ className, redirectUrl, ...props }: SignInFormProps
 	const pathname = usePathname();
 	useEffect(() => {
 		authClient.getSession().then((session) => {
-			// Don't redirect if already on the intended path
 			if (!session && pathname !== '/') {
 				router.push('/');
 				return;
 			}
-			else {
-				const isEmailVerified = session?.data?.user?.emailVerified
-				router.push('/dashboard/community');
-			}
-
 		});
+		// Only depend on router and pathname to avoid unnecessary reruns
 	}, [router, pathname]);
 
 	async function handleSignIn(formData: SignInFormType) {
 		setIsLoading(true);
-		await authClient.signIn.email({ ...formData, callbackURL: redirectUrl }, {
+		await authClient.signIn.email({ ...formData }, {
 			onSuccess: () => {
 				toast.success('Login successful');
 				setIsLoading(false);
+				router.push(`/dashboard/community`);
 			},
 			onError: (ctx) => {
 				setIsLoading(false);
-				if (ctx.error.status === 403) {
-					toast.error("Please verify your email address");
-					router.push(`/verify-email?email=${form.getValues('email')}`);
-				}
-				else {
-					toast.error(ctx.error?.message as string)
-				}
-
+				toast.error(ctx.error?.message as string)
 			},
 		});
 	}

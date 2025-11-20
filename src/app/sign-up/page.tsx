@@ -1,12 +1,13 @@
+"use client";
 import AuthBackgroundShape from '@/assets/svg/auth-background-shape';
 import { SignUpForm } from '@/components/auth/sign-up-form';
 import { Logo } from '@/components/commons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { redirect } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
-export default function SignUpPage({ searchParams }: { searchParams: { redirect?: string } }) {
-  const redirectUrl = searchParams.redirect || "/dashboard";
-  console.log("redirectUrl", redirectUrl);
+export default function SignUpPage() {
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/dashboard";
   return (
     <div className='relative flex h-auto min-h-screen items-center justify-center overflow-x-hidden px-4 py-10 sm:px-6 lg:px-8'>
       <div className='absolute'>
@@ -23,7 +24,7 @@ export default function SignUpPage({ searchParams }: { searchParams: { redirect?
           </div>
         </CardHeader>
         <CardContent>
-          <SignUpForm redirectUrl={redirectUrl} />
+          <SignUpForm redirectUrl={redirect} />
         </CardContent>
       </Card>
     </div>
