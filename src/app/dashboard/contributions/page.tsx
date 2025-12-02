@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/server/authentication';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
 
 export default async function ContributionsPage() {
   const user = await getSession();
@@ -21,8 +24,13 @@ export default async function ContributionsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Contributions</h1>
-          <p className="text-muted-foreground">Track your contribution history</p>
+          <p className="text-muted-foreground">Track and manage your community contributions</p>
         </div>
+        <Button variant='default' asChild>
+          <Link href="#">
+            <Plus /> New Contribution
+          </Link>
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -33,10 +41,10 @@ export default async function ContributionsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${Number(contributionStats.total_approved).toFixed(2)}
+              ${Number(contributionStats?.total_approved || 0).toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {contributionStats.approved_count} contributions
+              {contributionStats?.approved_count || 0} contributions
             </p>
           </CardContent>
         </Card>
@@ -47,7 +55,7 @@ export default async function ContributionsPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{contributionStats.pending_count}</div>
+            <div className="text-2xl font-bold">{contributionStats?.pending_count || 0}</div>
             <p className="text-xs text-muted-foreground">Awaiting review</p>
           </CardContent>
         </Card>
