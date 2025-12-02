@@ -1,6 +1,5 @@
 'use server';
 
-<<<<<<< HEAD:src/server/community.ts
 import { getSession } from '@/server/authentication';
 import { db } from '@/drizzle/db';
 import { Plan, plan, community } from '@/drizzle/schema';
@@ -10,20 +9,11 @@ import slugify from 'slugify';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { eq } from 'drizzle-orm';
-=======
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { z } from 'zod';
-import { getSession } from '@/app/actions/auth';
-import { db } from '@/drizzle/db';
-import { Plan, plan } from '@/drizzle/schema';
->>>>>>> 02c7d98 (Update dependencies, refactor community-related components, and enhance UI):src/app/actions/community.ts
 
 export async function getPlans(): Promise<Plan[] | null> {
   const plans = await db.query.plan.findMany();
   return plans;
 }
-<<<<<<< HEAD:src/server/community.ts
 
 export async function createCommunity(data: {
   name: string;
@@ -113,5 +103,3 @@ export async function getCommunityById(communityId: string) {
     return { success: false, message: err?.message || 'An unexpected error occurred', data: null };
   }
 }
-=======
->>>>>>> 02c7d98 (Update dependencies, refactor community-related components, and enhance UI):src/app/actions/community.ts

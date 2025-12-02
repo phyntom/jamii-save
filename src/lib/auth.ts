@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 import { metadata } from './../app/layout';
 import { member } from './../drizzle/schemas/member';
-=======
->>>>>>> 02c7d98 (Update dependencies, refactor community-related components, and enhance UI)
 import VerifyEmailTemplate from '@/components/emails/verify-email-template';
 import ResetPasswordTemplate from '@/components/emails/reset-password-template';
 import { db } from '@/drizzle/db';
@@ -12,13 +9,10 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
 import { createAuthMiddleware } from 'better-auth/api';
 import { Resend } from 'resend';
-<<<<<<< HEAD
 import WelcomeEmailTemplate from '@/components/emails/welcome-email-template';
 import { organization } from 'better-auth/plugins';
 import { admin } from 'better-auth/plugins';
 import CommunityInviteEmailTemplate from '@/components/emails/community-invite-email-template';
-=======
->>>>>>> 02c7d98 (Update dependencies, refactor community-related components, and enhance UI)
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -29,10 +23,7 @@ export const auth = betterAuth({
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
       // Replace the callbackURL to redirect to sign-in page
-<<<<<<< HEAD
       console.log('Sending verification email to:', url);
-=======
->>>>>>> 02c7d98 (Update dependencies, refactor community-related components, and enhance UI)
       url = url.replace('callbackURL=/', 'callbackURL=/sign-in');
       resend.emails.send({
         from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
@@ -49,19 +40,11 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     expiresIn: 3600,
-<<<<<<< HEAD
     // callbackURL: '/sign', // 1 hour
   },
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url, token }) => {
-=======
-    callbackURL: '/sign', // 1 hour
-  },
-  emailAndPassword: {
-    enabled: true,
-    sendResetPassword: async ({ user, url }) => {
->>>>>>> 02c7d98 (Update dependencies, refactor community-related components, and enhance UI)
       // Replace the callbackURL to redirect to sign-in page
       resend.emails.send({
         from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
@@ -69,20 +52,12 @@ export const auth = betterAuth({
         subject: 'Reset your password',
         react: ResetPasswordTemplate({
           username: user.name,
-<<<<<<< HEAD
           resetUrl: `${url}?token=${token}`,
-=======
-          resetUrl: url,
->>>>>>> 02c7d98 (Update dependencies, refactor community-related components, and enhance UI)
           email: user.email as string,
         }),
       });
     },
-<<<<<<< HEAD
     requireEmailVerification: false,
-=======
-    requireEmailVerification: true,
->>>>>>> 02c7d98 (Update dependencies, refactor community-related components, and enhance UI)
   },
   socialProviders: {
     google: {
