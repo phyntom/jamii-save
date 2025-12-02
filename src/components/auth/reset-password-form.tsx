@@ -17,135 +17,135 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 const resetPasswordSchema = z.object({
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string().min(8, 'Confirm password must be at least 8 characters'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string().min(8, 'Confirm password must be at least 8 characters'),
 }).superRefine(({ confirmPassword, password }, ctx) => {
-    if (confirmPassword !== password) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'Passwords do not match',
-            path: ['confirmPassword'],
-        });
-    }
+  if (confirmPassword !== password) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Passwords do not match',
+      path: ['confirmPassword'],
+    });
+  }
 });
 
 type ResetPasswordFormType = z.infer<typeof resetPasswordSchema>
 
 export function ResetPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
-    const [isLoading, setIsLoading] = useState(false);
-    const searchParams = useSearchParams();
-    const token = searchParams.get('token');
-    const error = searchParams.get('error');
-    const router = useRouter();
-    const form = useForm({
-        resolver: zodResolver(resetPasswordSchema),
-        defaultValues: {
-            password: '',
-            confirmPassword: '',
-        },
+  const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+  const error = searchParams.get('error');
+  const router = useRouter();
+  const form = useForm({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+
+  async function onSubmit(values: ResetPasswordFormType) {
+    setIsLoading(true);
+    const { error } = await authClient.resetPassword({
+      newPassword: values.password,
+      token: token as string,
     });
 
-
-    async function onSubmit(values: ResetPasswordFormType) {
-        setIsLoading(true);
-        const { error } = await authClient.resetPassword({
-            newPassword: values.password,
-            token: token as string,
-        });
-
-        if (error) {
-            if (error.code === 'invalid_token'.toUpperCase()) {
-                toast.error('Invalid reset password link');
-                router.push('/forgot-password');
-                return;
-            }
-            toast.error(error.message);
-        } else {
-            toast.success('Password reset successfully');
-            router.push('/sign-in');
-        }
-        setIsLoading(false);
+    if (error) {
+      if (error.code === 'invalid_token'.toUpperCase()) {
+        toast.error('Invalid reset password link');
+        router.push('/forgot-password');
+        return;
+      }
+      toast.error(error.message);
+    } else {
+      toast.success('Password reset successfully');
+      router.push('/sign-in');
     }
+    setIsLoading(false);
+  }
 
-    if (!token || error !== null) {
-        return (
-            <div className={cn('flex flex-col gap-6', className)} {...props}>
-                <Card>
-                    <CardHeader className="text-center">
-                        <CardTitle className="text-xl text-destructive">Invalid Reset Password Link</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-destructive">The reset password link is invalid or has expired. Please request a new reset password link.</p>
-                        <p className="text-sm text-destructive">An error occurred while resetting your password</p>
-                    </CardContent>
-                    <CardFooter>
-                        <Button variant="outline" asChild className="mx-auto w-[50%]">
-                            <Link href="/sign-in">Back</Link>
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </div >
-        );
-    }
+  if (!token || error !== null) {
     return (
-        <div className={cn('flex flex-col gap-6', className)} {...props}>
-            <Card>
-                <CardHeader className="text-center">
-                    <CardTitle className="text-xl">Forgot Password</CardTitle>
-                    <CardDescription>Enter your email to reset your password</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form id="reset-password-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                        <FieldGroup>
-                            <Controller
-                                name="password"
-                                control={form.control}
-                                render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                                        <FieldContent>
-                                            <Input
-                                                {...field}
-                                                type="password"
-                                                aria-invalid={fieldState.invalid}
-                                                id={field.name}
-                                            />
-                                        </FieldContent>
-                                        {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
-                                    </Field>
-                                )}
-                            />
-                            <Controller
-                                name="confirmPassword"
-                                control={form.control}
-                                render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor={field.name}>Comfirm Password</FieldLabel>
-                                        <FieldContent>
-                                            <Input
-                                                type="password"
-                                                {...field}
-                                                aria-invalid={fieldState.invalid}
-                                                id={field.name}
-                                            />
-                                        </FieldContent>
-                                        {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
-                                    </Field>
-                                )}
-                            />
-                        </FieldGroup>
-                        <Field orientation="horizontal">
-                            <Button type="submit" className="mx-auto w-[50%]" disabled={isLoading}>
-                                {isLoading ? (
-                                    <Loader2 className="size-4 animate-spin" />) :
-                                    (
-                                        'Reset Password'
-                                    )}
-                            </Button>
-                        </Field>
-                    </form>
-                </CardContent>
-            </Card>
-        </div>
+      <div className={cn('flex flex-col gap-6', className)} {...props}>
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl text-destructive">Invalid Reset Password Link</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-destructive">The reset password link is invalid or has expired. Please request a new reset password link.</p>
+            <p className="text-sm text-destructive">An error occurred while resetting your password</p>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" asChild className="mx-auto w-[50%]">
+              <Link href="/sign-in">Back</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+      </div >
     );
+  }
+  return (
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">Forgot Password</CardTitle>
+          <CardDescription>Enter your email to reset your password</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form id="reset-password-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FieldGroup>
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <FieldContent>
+                      <Input
+                        {...field}
+                        type="password"
+                        aria-invalid={fieldState.invalid}
+                        id={field.name}
+                      />
+                    </FieldContent>
+                    {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="confirmPassword"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Comfirm Password</FieldLabel>
+                    <FieldContent>
+                      <Input
+                        type="password"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                        id={field.name}
+                      />
+                    </FieldContent>
+                    {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
+                  </Field>
+                )}
+              />
+            </FieldGroup>
+            <Field orientation="horizontal">
+              <Button type="submit" className="mx-auto w-[50%]" disabled={isLoading}>
+                {isLoading ? (
+                  <Loader2 className="size-4 animate-spin" />) :
+                  (
+                    'Reset Password'
+                  )}
+              </Button>
+            </Field>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
