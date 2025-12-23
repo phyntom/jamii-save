@@ -6,18 +6,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
+import { getUserContributions } from '@/server/contributions';
+import { authClient } from '@/lib/auth-client';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 export default async function ContributionsPage() {
-  const user = await getSession();
-  if (!user) redirect('/sign-in');
+  const userSession = await getSession();
+  if (!userSession) redirect('/sign-in');
+
+  const { session, user } = userSession;
+
+  // if no active organization, redirect to community selection
+  if (!session.activeOrganizationId) redirect('/dashboard/community');
 
   // Fetch user's contributions
-  const contributions: any[] = [];
-
-  // Calculate stats
-  const stats: any[] = [];
-
-  const contributionStats = stats[0];
+  const { contributions, contributionStats } = await getUserContributions(user.id, session.activeOrganizationId);
 
   return (
     <div className="space-y-6">
@@ -27,7 +31,7 @@ export default async function ContributionsPage() {
           <p className="text-muted-foreground">Track and manage your community contributions</p>
         </div>
         <Button variant='default' asChild>
-          <Link href="#">
+          <Link href="/dashboard/contributions/create">
             <Plus /> New Contribution
           </Link>
         </Button>
@@ -41,10 +45,10 @@ export default async function ContributionsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${Number(contributionStats?.total_approved || 0).toFixed(2)}
+              ${Number(contributionStats?.totalApproved || 0).toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {contributionStats?.approved_count || 0} contributions
+              {Number(contributionStats?.approvedCount || 0)} contributions
             </p>
           </CardContent>
         </Card>
@@ -55,7 +59,7 @@ export default async function ContributionsPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{contributionStats?.pending_count || 0}</div>
+            <div className="text-2xl font-bold">{Number(contributionStats?.pendingCount || 0)}</div>
             <p className="text-xs text-muted-foreground">Awaiting review</p>
           </CardContent>
         </Card>
@@ -69,7 +73,7 @@ export default async function ContributionsPage() {
             <div className="text-2xl font-bold">
               {contributions.length > 0
                 ? Math.round(
-                  (Number(contributionStats.approved_count) / contributions.length) * 100,
+                  (Number(contributionStats.approvedCount) / contributions.length) * 100,
                 )
                 : 0}
               %
@@ -128,7 +132,7 @@ export default async function ContributionsPage() {
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-bold">${Number(contribution.amount).toFixed(2)}</p>
+                    <p className="text-xl font-bold">${Number(contribution.contribution_amount).toFixed(2)}</p>
                   </div>
                 </div>
               ))}

@@ -4,17 +4,11 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getSession } from '@/server/authentication';
-import { sql } from '@/lib/db';
-
-const recordContributionSchema = z.object({
-  groupId: z.string(),
-  amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: 'Amount must be a positive number',
-  }),
-  paymentMethod: z.enum(['cash', 'bank_transfer', 'mobile_money', 'card']),
-  referenceNumber: z.string().optional(),
-  notes: z.string().optional(),
-});
+import { sql, db } from '@/drizzle/db';
+import { useSession } from '@/lib/auth-client';
+import { recordContributionSchema } from '@/validation/contribution';
+import { contribution } from '@/drizzle/schema';
+import { and, desc, eq, sum } from 'drizzle-orm';
 
 const approveContributionSchema = z.object({
   contributionId: z.string(),
@@ -22,54 +16,42 @@ const approveContributionSchema = z.object({
   notes: z.string().optional(),
 });
 
-export async function recordContribution(formData: FormData) {
-  const user = await getSession();
-  if (!user) redirect('/sign-in');
+export async function recordContribution(data: z.infer<typeof recordContributionSchema>) {
+  const userSession = await getSession();
+  if (!userSession) redirect('/sign-in'); // why not return an error message?
 
-  const data = {
-    groupId: formData.get('groupId') as string,
-    amount: formData.get('amount') as string,
-    paymentMethod: formData.get('paymentMethod') as string,
-    referenceNumber: formData.get('referenceNumber') as string,
-    notes: formData.get('notes') as string,
-  };
-
-  const validation = recordContributionSchema.safeParse(data);
-  if (!validation.success) {
-    return { error: validation.error.errors[0].message };
-  }
-
-  const { groupId, amount, paymentMethod, referenceNumber, notes } = validation.data;
+  const { user } = userSession;
 
   try {
-    // Check if user is a member of the group
+    // Check if user is a member of the community
     const membership = await sql`
-      SELECT id FROM jamii.group_members
-      WHERE group_id = ${Number(groupId)} AND user_id = ${user.id} AND status = 'active'
+      SELECT EXISTS (
+        SELECT 1
+        FROM jamii.member
+        WHERE user_id = ${user.id}
+          AND community_id = ${data.groupId}
+)
     `;
 
-    if (membership.length === 0) {
+    if (!membership) {
       return { error: 'You are not a member of this group' };
     }
 
     // Record the contribution
-    await sql`
-      INSERT INTO jamii.contributions (
-        group_id, user_id, amount, payment_method, 
-        reference_number, notes, status
-      )
-      VALUES (
-        ${Number(groupId)},
-        ${user.id},
-        ${Number(amount)},
-        ${paymentMethod},
-        ${referenceNumber || null},
-        ${notes || null},
-        'pending'
-      )
-    `;
+    await db.insert(contribution).values({
+      user_id: user.id,
+      community_id: data.groupId,
+      reference_number: data.referenceNumber,
+      contribution_type: data.contributionType,
+      contribution_amount: Number(data.amount),
+      payment_method: data.paymentMethod,
+      currency: data.currency,
+      contribution_date: data.contributionDate,
+      contribution_period: data.contributionPeriod,
+      status: 'pending',
+    });
 
-    revalidatePath(`/dashboard/groups/${groupId}/contributions`);
+    revalidatePath(`/dashboard/groups/${data.groupId}/contributions`);
     revalidatePath('/dashboard/contributions');
     return {
       success: true,
@@ -158,4 +140,58 @@ export async function approveContribution(formData: FormData) {
     console.error('[v0] Approve contribution error:', error);
     return { error: 'Failed to process contribution. Please try again.' };
   }
+}
+
+// get contributions
+export async function getUserContributions(userId: string, communityId: string) {
+  const [contributionsResult, statsResult] = await Promise.all([
+    sql`
+      SELECT
+        *
+      FROM jamii.contribution
+      WHERE user_id = ${userId}
+        AND community_id = ${communityId}
+      ORDER BY contribution_date DESC, created_at DESC
+    `,
+    sql`
+      SELECT
+        COALESCE(SUM(contribution_amount), 0)::float8
+          AS "totalAmount",
+
+        COUNT(*)::int
+          AS "totalCount",
+
+        COUNT(*) FILTER (WHERE status = ${'approved'})::int
+          AS "approvedCount",
+
+        COUNT(*) FILTER (WHERE status = ${'pending'})::int
+          AS "pendingCount",
+
+        COUNT(*) FILTER (WHERE status = ${'rejected'})::int
+          AS "rejectedCount",
+
+        COALESCE(
+          SUM(contribution_amount)
+            FILTER (WHERE status = ${'approved'}),
+          0
+        )::float8
+          AS "approvedTotalAmount"
+
+      FROM jamii.contribution
+      WHERE user_id = ${userId}
+        AND community_id = ${communityId}
+    `,
+  ]);
+
+  const contributions = contributionsResult ?? [];
+  const contributionStats = statsResult[0] ?? {
+    totalAmount: 0,
+    totalApproved: 0,
+    totalCount: 0,
+    approvedCount: 0,
+    pendingCount: 0,
+    rejectedCount: 0,
+  };
+
+  return { contributions, contributionStats };
 }

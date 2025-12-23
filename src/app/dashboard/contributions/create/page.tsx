@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/app/actions/auth";
-import { RecordContributionForm } from "@/components/contributions/record-contribution-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getSession } from "@/server/authentication";
+import { authClient } from "@/lib/auth-client";
+import RecordContribution from "@/components/contributions/record-contribution";
 
 export default async function CreateContributionPage() {
   const user = await getSession();
   if (!user) redirect('/sign-in');
+
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -14,16 +15,7 @@ export default async function CreateContributionPage() {
         <p className="text-muted-foreground">Contribute funds to your community or add a record of contribution</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Record new contribution</CardTitle>
-          <CardDescription>Enter the information for your contribution</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {/* contribution form */}
-          <RecordContributionForm />
-        </CardContent>
-      </Card>
+      <RecordContribution />
     </div>
   )
 }
