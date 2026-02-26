@@ -1,8 +1,9 @@
 import { boolean, integer, numeric, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { nanoid } from 'nanoid';
-import { user } from './auth';
 import { plan } from './plan';
 import { baseSchema } from './base-schema';
+import { relations } from 'drizzle-orm';
+import { member } from './member';
 
 export const visibilityEnum = baseSchema.enum('visibility', ['public', 'private', 'unlisted']);
 export const currencyEnum = baseSchema.enum('currency', [
@@ -38,31 +39,36 @@ export const community = baseSchema.table('community', {
     .$defaultFn(() => nanoid()),
   name: text('name').notNull(),
   description: text('description'),
+  slug: text('slug').notNull().unique(),
+  logo: text('logo'),
+  created_at: timestamp('created_at').notNull(),
+  metadata: text('metadata'),
   visibility: visibilityEnum('visibility').notNull().default('private'),
-  contribution_frequency: text('contribution_frequency').notNull().default('monthly'),
-  country: text('country').notNull().default('CANADA'),
+  contributionFrequency: text('contribution_frequency').notNull().default('monthly'),
+  country: countryEnum('country').notNull().default('CANADA'),
   currency: currencyEnum('currency').notNull().default('CAD'),
-  target_amount: numeric('contribution_amount', {
+  targetAmount: numeric('contribution_amount', {
     precision: 10,
     scale: 2,
   }).notNull(),
-  current_member_count: integer('current_member_count').notNull().default(0),
-  additional_member_count: integer('additional_member_count').notNull().default(0),
-  is_active: boolean('is_active').default(true).notNull(),
-  admin_id: text('admin_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  admin_email: text('admin_email').notNull(),
-  max_members: integer('max_members').notNull().default(30),
-  plan_type: integer('plan_type')
+  currentMemberCount: integer('current_member_count').notNull().default(0),
+  additionalMemberCount: integer('additional_member_count').notNull().default(0),
+  isActive: boolean('is_active').default(true).notNull(),
+  adminEmail: text('admin_email').notNull(),
+  maxMembers: integer('max_members').notNull().default(30),
+  planType: integer('plan_type')
     .notNull()
     .references(() => plan.id, { onDelete: 'cascade' }),
-  logo_url: text('logo_url'),
-  contribution_start_date: timestamp('contribution_start_date'),
-  community_start_date: timestamp('community_start_date'),
-  created_at: timestamp('created_at').defaultNow().notNull(),
-  updated_at: timestamp('updated_at')
+  contributionStartDate: timestamp('contribution_start_date'),
+  communityStartDate: timestamp('community_start_date'),
+  updatedAt: timestamp('updated_at')
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
+
+export const communityRelations = relations(community, ({ many }) => ({
+  members: many(member),
+}));
+
+export type Community = typeof community.$inferSelect;

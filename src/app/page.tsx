@@ -218,7 +218,7 @@ export default function LandingPage() {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full" variant="outline">
+                <Button variant="outline">
                   Get Started Free
                 </Button>
               </CardFooter>

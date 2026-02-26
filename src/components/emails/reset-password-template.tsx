@@ -53,7 +53,7 @@ const ResetPasswordTemplate = (props: ResetPasswordTemplateProps) => {
                                 Click the button below to create a new password.
                             </Text>
                             <Section>
-                                <Button href={resetUrl} style={verifyButton}>Verify Email</Button>
+                                <Button href={resetUrl} style={verifyButton}>Reset Password</Button>
                                 <Text style={validityText}>
                                     ( This link will expire in 24 hours)
                                 </Text>
