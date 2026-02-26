@@ -1,6 +1,7 @@
 export * from './schemas/auth';
 export * from './schemas/community';
 export * from './schemas/community-loan-term';
+export * from './schemas/contribution';
 export * from './schemas/invitation';
 export * from './schemas/member';
 // Export other tables

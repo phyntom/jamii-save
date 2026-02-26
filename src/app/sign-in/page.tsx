@@ -6,7 +6,7 @@ import AuthBackgroundShape from '@/assets/svg/auth-background-shape';
 import { useSearchParams } from 'next/navigation';
 
 
-export default async function SignInPage() {
+export default function SignInPage() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard/community";
   return (

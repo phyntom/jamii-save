@@ -15,6 +15,13 @@
       "when": 1762230489588,
       "tag": "0001_nervous_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762230489588,
+      "tag": "0001_nervous_goliath",
+      "breakpoints": true
     }
   ]
 }

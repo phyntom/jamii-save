@@ -1,24 +1,11 @@
 import { boolean, integer, numeric, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { nanoid } from 'nanoid';
 import { plan } from './plan';
-import { baseSchema } from './base-schema';
 import { relations } from 'drizzle-orm';
 import { member } from './member';
+import { baseSchema, currencyEnum } from './base-schema';
 
 export const visibilityEnum = baseSchema.enum('visibility', ['public', 'private', 'unlisted']);
-export const currencyEnum = baseSchema.enum('currency', [
-  'CAD',
-  'USD',
-  'EUR',
-  'GBP',
-  'KES',
-  'NGN',
-  'ZAR',
-  'GHS',
-  'TZS',
-  'UGX',
-  'RWF',
-]);
 
 export const countryEnum = baseSchema.enum('country', [
   'CANADA', // CAD
