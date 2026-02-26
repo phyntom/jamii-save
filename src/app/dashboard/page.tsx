@@ -2,25 +2,25 @@ import { Session } from 'better-auth';
 import { CreditCard, DollarSign, TrendingUp, Users } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getSession } from '@/app/actions/auth';
+import { getSession } from '@/server/authentication';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getCommunities } from '@/server/community';
 
 export default async function DashboardPage() {
   const session = (await getSession()) || null;
   const user = session?.user;
   if (!session) redirect('/sign-in');
 
-  // Fetch user's groups
-  // const groups: any[] = await sql`
-  //   SELECT g.*, gm.role
-  //   FROM jamii.groups g
-  //   JOIN jamii.group_members gm ON g.id = gm.group_id
-  //   WHERE gm.user_id = ${user?.id} AND gm.status = 'active'
-  //   ORDER BY g.created_at DESC
-  // `
-  const communities: any[] = [];
+  const { success, data: userCommunities, message } = await getCommunities();
+  if (!success) {
+    return <div>{message}</div>;
+  }
+  const communitiesData = userCommunities;
+  if (!communitiesData || communitiesData?.length === 0) {
+    return <div>No communities found</div>;
+  }
 
   // Fetch total contributions
   const contributionsResult: any[] = [];
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* <StatsCard title="Total Groups" value={groups.length} description="Active savings groups" icon={Users} />
+        <StatsCard title="Total Groups" value={communitiesData.length} description="Active savings groups" icon={Users} />
         <StatsCard
           title="Total Contributions"
           value={`$${totalContributions.toFixed(2)}`}
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
           description={`$${totalLoanAmount.toFixed(2)} total`}
           icon={CreditCard}
         />
-        <StatsCard title="Savings Rate" value="85%" description="On-time contributions" icon={TrendingUp} /> */}
+        <StatsCard title="Savings Rate" value="85%" description="On-time contributions" icon={TrendingUp} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -83,16 +83,16 @@ export default async function DashboardPage() {
             <CardDescription>Savings Communities you're part of</CardDescription>
           </CardHeader>
           <CardContent>
-            {communities?.length === 0 ? (
-              <div className="text-center py-8">
+            {communitiesData?.length === 0 ? (
+              <div className="text-center py-8 bg-muted-foreground rounded-bl-md rounded-br-md">
                 <p className="text-muted-foreground mb-4">You're not part of any groups yet</p>
                 <Button asChild>
-                  <Link href="/dashboard/community/create">Create a Group</Link>
+                  <Link href="/dashboard/community/create">Create a Community</Link>
                 </Button>
               </div>
             ) : (
               <div className="space-y-4">
-                {communities.slice(0, 3).map((community: any) => (
+                {communitiesData.slice(0, 3).map((community: any) => (
                   <div
                     key={community.id}
                     className="flex items-center justify-between p-4 border rounded-lg"
@@ -100,16 +100,16 @@ export default async function DashboardPage() {
                     <div>
                       <h3 className="font-medium">{community.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        ${Number(community.contribution_amount).toFixed(2)}{' '}
-                        {community.contribution_frequency}
+                        Target: ${Number(community.targetAmount).toFixed(2)}{' '}
+                        {community.contributionFrequency}
                       </p>
                     </div>
                     <Button variant="outline" size="sm" asChild>
-                      <Link href={`/dashboard/groups/${community.id}`}>View</Link>
+                      <Link href={`/dashboard/community/${community.id}`}>View</Link>
                     </Button>
                   </div>
                 ))}
-                {communities.length > 3 && (
+                {communitiesData.length > 3 && (
                   <Button variant="ghost" className="w-full" asChild>
                     <Link href="/dashboard/groups">View all groups</Link>
                   </Button>
@@ -142,13 +142,12 @@ export default async function DashboardPage() {
                     <div className="text-right">
                       <p className="font-medium">${Number(contribution.amount).toFixed(2)}</p>
                       <p
-                        className={`text-xs ${
-                          contribution.status === 'approved'
-                            ? 'text-green-600'
-                            : contribution.status === 'pending'
-                              ? 'text-amber-600'
-                              : 'text-red-600'
-                        }`}
+                        className={`text-xs ${contribution.status === 'approved'
+                          ? 'text-green-600'
+                          : contribution.status === 'pending'
+                            ? 'text-amber-600'
+                            : 'text-red-600'
+                          }`}
                       >
                         {contribution.status}
                       </p>
