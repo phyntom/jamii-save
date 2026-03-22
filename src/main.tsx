@@ -14,7 +14,7 @@ createRoot(document.getElementById("root")!).render(
     <ConvexAuthProvider client={convex}>
       <BrowserRouter>
         <App />
-        <Toaster richColors position="top-left" />
+        <Toaster richColors position="top-right" />
       </BrowserRouter>
     </ConvexAuthProvider>
   </StrictMode>,

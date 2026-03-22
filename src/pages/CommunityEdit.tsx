@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useOutletContext, useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,13 +21,20 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { FormSelect } from "@/components/FormSelect";
 import { COUNTRY_OPTIONS } from "@/constants/countries";
+import { FileUpload } from "@/components/FileUpload";
+import { Id } from "convex/_generated/dataModel";
+import { OutletContext } from "@/types";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required").max(60),
   description: z.string().max(280).optional(),
   country: z.string().min(1, "Country is required").max(80),
+  logo: z
+    .instanceof(File)
+    .refine((f) => f.size < 3 * 1024 * 1024, "Max 3MB")
+    .refine((f) => f.type.startsWith("image/"), "Must be an image")
+    .optional(),
   isActive: z.boolean(),
-
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -35,19 +42,19 @@ type FormValues = z.infer<typeof schema>;
 export default function CommunityEdit() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-
-  const community = useQuery(
-    api.communities.getBySlug,
-    slug ? { slug } : "skip",
-  );
-
-  console.log("community", community);
-
+  const uploadFile = useMutation(api.communities.generateUploadUrl);
   const updateCommunity = useMutation(api.communities.update);
+  const { community } = useOutletContext<OutletContext>();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", description: "", isActive: true },
+    defaultValues: {
+      name: "",
+      description: "",
+      isActive: true,
+      country: community?.country ?? "",
+      logo: undefined,
+    },
   });
 
   const { watch, formState } = form;
@@ -55,19 +62,12 @@ export default function CommunityEdit() {
   const descValue = watch("description") ?? "";
   const isActive = watch("isActive");
 
-
-function handleUploadLogo(file : File){
-
-  const uploadUrl = useMutation(api.communities.uploadFile);
-
-}  
-
-
   useEffect(() => {
     if (community) {
       form.reset({
         name: community.name,
         description: community.description ?? "",
+        country: community.country ?? "",
         isActive: community.isActive,
       });
     }
@@ -75,8 +75,28 @@ function handleUploadLogo(file : File){
 
   async function onSubmit(data: FormValues) {
     if (!community) return;
+    let storageId: Id<"_storage"> | undefined;
     try {
-      await updateCommunity({ id: community._id, ...data });
+      if (data.logo) {
+        const uploadUrl = await uploadFile();
+        const res = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": data.logo.type },
+          body: data.logo,
+        });
+        const { storageId: id } = (await res.json()) as {
+          storageId: Id<"_storage">;
+        };
+        storageId = id;
+      }
+      await updateCommunity({
+        id: community._id,
+        name: data.name,
+        description: data.description,
+        isActive: data.isActive,
+        logo: storageId ?? undefined,
+        country: data.country,
+      });
       toast.success("Community updated.");
       navigate(`/communities/${slug}`);
     } catch {
@@ -101,7 +121,7 @@ function handleUploadLogo(file : File){
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10">
+    <div className="bg-card border border-border/50 rounded-xl w-2xl lg:w-4xl mx-auto px-6 py-10 my-4">
       <button
         onClick={() => navigate(`/communities/${slug}`)}
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
@@ -118,7 +138,7 @@ function handleUploadLogo(file : File){
       </p>
 
       {/* Slug display — read only, not part of the form */}
-      <div className="bg-muted/50 border border-border/50 rounded-xl px-4 py-3 mb-4 flex items-center gap-2">
+      <div className="bg-muted border rounded-xl px-4 py-3 mb-4 flex items-center gap-2">
         <span className="text-xs text-muted-foreground font-mono">slug</span>
         <span className="text-sm font-mono text-foreground">
           @{community.slug}
@@ -130,7 +150,7 @@ function handleUploadLogo(file : File){
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="bg-background border border-border/50 rounded-xl p-6 space-y-5">
+          <div className="border border-border/50 rounded-xl p-6 space-y-5">
             <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
               Basic info
             </p>
@@ -156,17 +176,12 @@ function handleUploadLogo(file : File){
               label="Country"
               placeholder="Select a country"
               options={COUNTRY_OPTIONS}
+              className="w-full"
             />
-            <FormInput
-              control={form.control}
-              variant="file"
-              name="logo"
-              label="Logo"
-              accept="image/*"
-            />
+            <FileUpload name="logo" label="Logo" accept="image/*" />
           </div>
 
-          <div className="bg-background border border-border/50 rounded-xl p-6">
+          <div className="bg-card border border-border/50 rounded-xl p-6">
             <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mb-4">
               Settings
             </p>
@@ -199,6 +214,7 @@ function handleUploadLogo(file : File){
             slug={community.slug}
             description={descValue}
             isActive={isActive}
+            logo={community.logo}
           />
 
           <div className="flex items-center justify-end gap-3 pt-2">

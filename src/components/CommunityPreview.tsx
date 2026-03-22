@@ -1,8 +1,13 @@
+import { Id } from "convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+
 type CommunityPreviewProps = {
   name: string;
   slug: string;
   description: string;
   isActive: boolean;
+  logo?: string;
 };
 
 function getInitials(name: string) {
@@ -20,17 +25,29 @@ export function CommunityPreview({
   slug,
   description,
   isActive,
+  logo,
 }: CommunityPreviewProps) {
   const initials = name ? getInitials(name) : "?";
+  const logoUrl = useQuery(api.communities.getLogoUrl, {
+    storageId: logo as Id<"_storage"> | undefined,
+  });
 
   return (
-    <div className="bg-background border border-border/50 rounded-xl p-6">
+    <div className="bg-card/60 border border-border/50 rounded-xl p-6">
       <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mb-4">
         Preview
       </p>
       <div className="flex items-start gap-3 bg-muted/50 rounded-lg p-4">
         <div className="w-10 h-10 rounded-[10px] bg-blue-50 dark:bg-blue-950 flex items-center justify-center text-sm font-medium text-blue-700 dark:text-blue-300 font-mono shrink-0">
-          {initials}
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt={name}
+              className="w-10 h-10 rounded-[10px] object-cover"
+            />
+          ) : (
+            initials
+          )}
         </div>
         <div>
           <p

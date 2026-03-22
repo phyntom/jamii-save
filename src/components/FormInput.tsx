@@ -11,11 +11,13 @@ import { cn } from "@/lib/utils";
 import type { HTMLInputTypeAttribute } from "react";
 import { useWatch } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import { Paperclip } from "lucide-react";
 
 // ── shared ────────────────────────────────────────────────────────────────────
 
-type Base<TFieldValues extends FieldValues, TName extends Path<TFieldValues>> = {
+type Base<
+  TFieldValues extends FieldValues,
+  TName extends Path<TFieldValues>,
+> = {
   control: Control<TFieldValues>;
   name: TName;
   label: string;
@@ -56,57 +58,12 @@ type TextareaVariant<
   textareaClassName?: string;
 };
 
-// ── file variant ──────────────────────────────────────────────────────────────
-
-type FileVariant<
-  TFieldValues extends FieldValues,
-  TName extends Path<TFieldValues>,
-> = Base<TFieldValues, TName> & {
-  variant: "file";
-  /** Passed to the native `accept` attribute, e.g. `"image/*"` or `".pdf,.docx"` */
-  accept?: string;
-  multiple?: boolean;
-  inputClassName?: string;
-};
-
 // ── public union ──────────────────────────────────────────────────────────────
 
 export type FormInputProps<
   TFieldValues extends FieldValues,
   TName extends Path<TFieldValues>,
-> =
-  | InputVariant<TFieldValues, TName>
-  | TextareaVariant<TFieldValues, TName>
-  | FileVariant<TFieldValues, TName>;
-
-// ── file label helper ─────────────────────────────────────────────────────────
-
-function FileLabel<
-  TFieldValues extends FieldValues,
-  TName extends Path<TFieldValues>,
->({
-  control,
-  name,
-  multiple,
-}: {
-  control: Control<TFieldValues>;
-  name: TName;
-  multiple?: boolean;
-}) {
-  const value = useWatch({ control, name }) as FileList | File | null | undefined;
-
-  if (!value) return <span>Choose file{multiple ? "s" : ""}…</span>;
-
-  if (value instanceof FileList) {
-    return (
-      <span className="truncate">
-        {value.length === 1 ? value[0].name : `${value.length} files selected`}
-      </span>
-    );
-  }
-
-  return <span className="truncate">{(value as File).name}</span>;
-}
+> = InputVariant<TFieldValues, TName> | TextareaVariant<TFieldValues, TName>;
 
 // ── char-count helper ─────────────────────────────────────────────────────────
 
@@ -123,10 +80,13 @@ function CharCount<
   maxLength: number;
 }) {
   const value = useWatch({ control, name });
-  const len = typeof value === "string" ? value.length : String(value ?? "").length;
+  const len =
+    typeof value === "string" ? value.length : String(value ?? "").length;
   return (
     <div className="flex justify-end">
-      <span className="text-xs text-muted-foreground">{len}/{maxLength}</span>
+      <span className="text-xs text-muted-foreground">
+        {len}/{maxLength}
+      </span>
     </div>
   );
 }
@@ -142,50 +102,9 @@ export function FormInput<
 >(props: FormInputProps<TFieldValues, TName>) {
   const { control, name, label, description, className, disabled } = props;
 
-  if (props.variant === "file") {
-    const { accept, multiple, inputClassName } = props;
-
-    return (
-      <FormField
-        control={control}
-        name={name}
-        disabled={disabled}
-        render={({ field: { onChange, onBlur, ref } }) => (
-          <FormItem className={className}>
-            <FormLabel>{label}</FormLabel>
-            <FormControl>
-              <label
-                className={cn(
-                  "flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-50",
-                  inputClassName,
-                )}
-              >
-                <Paperclip className="size-4 shrink-0" />
-                <input
-                  ref={ref}
-                  type="file"
-                  accept={accept}
-                  multiple={multiple}
-                  disabled={disabled}
-                  onBlur={onBlur}
-                  onChange={(e) =>
-                    onChange(multiple ? e.target.files : e.target.files?.[0] ?? null)
-                  }
-                  className="sr-only"
-                />
-                <FileLabel control={control} name={name} multiple={multiple} />
-              </label>
-            </FormControl>
-            {description && <FormDescription>{description}</FormDescription>}
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    );
-  }
-
   if (props.variant === "textarea") {
-    const { placeHolder, rows, maxLength, showCharCount, textareaClassName } = props;
+    const { placeHolder, rows, maxLength, showCharCount, textareaClassName } =
+      props;
 
     return (
       <FormField

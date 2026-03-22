@@ -2,21 +2,21 @@
 
 > **A comprehensive platform for managing rotating savings and credit associations (ROSCAs) with modern web technology**
 
-## 🏦 Overview
+## Overview
 
-Jamii Save is a digital platform that enables communities to organize collective savings groups with built-in loan functionality. The platform digitizes traditional rotating savings and credit associations (ROSCAs) with modern web technology, making it perfect for communities, cooperatives, and small businesses that need structured savings and lending programs.
+Jamii Save is a digital platform that enables communities to organize collective savings groups with built-in loan functionality. The platform digitizes traditional rotating savings and credit associations (ROSCAs), making it perfect for communities, cooperatives, and small businesses that need structured savings and lending programs.
 
-## 🚀 Key Features
+## Key Features
 
-### 🔐 Authentication & User Management
+### Authentication & User Management
 
-- **Secure Authentication**: Powered by Better-Auth with support for email/password and OAuth providers
+- **Secure Authentication**: Powered by Convex Auth with support for email/password and OAuth providers
 - **User Profiles**: Complete profile management with personal details (name, email, phone, location)
 - **Session Management**: Secure session handling with automatic token refresh
 - **Email Verification**: Built-in email verification system for account security
 - **Password Recovery**: Secure password reset functionality
 
-### 👥 Community & Membership Management
+### Community & Membership Management
 
 - **Community Creation**: Users can create savings communities with customizable settings
 - **Flexible Invitation System**: Support for email invitations, shareable links, and join codes
@@ -25,7 +25,7 @@ Jamii Save is a digital platform that enables communities to organize collective
 - **Member Management**: Invite, approve, remove, and manage community members
 - **Community Settings**: Configurable contribution rules, loan policies, and fees
 
-### 💰 Contribution Tracking
+### Contribution Tracking
 
 - **Contribution Recording**: Members can record their regular contributions
 - **Approval Workflow**: Community admins review and approve/reject contributions
@@ -33,63 +33,67 @@ Jamii Save is a digital platform that enables communities to organize collective
 - **Transaction History**: Complete audit trail for all contributions
 - **Payment Methods**: Support for cash, bank transfer, mobile money, and card payments
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### **Frontend**
 
-- **Next.js 15** with App Router for modern React development
+- **React 19** for building the user interface
+- **Vite** for fast development and optimized production builds
 - **TypeScript** for type safety and better developer experience
-- **Tailwind CSS** for utility-first styling
+- **React Router v7** for client-side routing
+- **Tailwind CSS v4** for utility-first styling
 - **Radix UI** components for accessible, unstyled UI primitives
 - **ShadCN/UI** for beautiful, customizable components
+- **React Hook Form** + **Zod** for form validation
 
-### **Backend & Database**
+### **Backend (Convex)**
 
-- **Better-Auth** for authentication and session management
-- **Drizzle ORM** for type-safe database operations
-- **PostgreSQL** on Neon for scalable, serverless database
-- **Server Actions** for secure server-side operations
+- **Convex** as the full backend-as-a-service: database, queries, mutations, and actions
+- **Convex Auth** (`@convex-dev/auth`) for authentication and session management
+- **Real-time data sync** out of the box via Convex's reactive query engine
 
-### **Database Features**
+### **Key Libraries**
 
-- **JSONB Support**: Rich feature flags and descriptions for subscription plans
-- **Enum Constraints**: Type-safe database constraints for data integrity
-- **Audit Trails**: Complete timestamp tracking on all entities
-- **Flexible Relationships**: Support for complex community and subscription relationships
+- `convex` — backend client and server SDK
+- `@convex-dev/auth` — authentication layer on top of Convex
+- `react-router` — client-side navigation
+- `zod` — schema validation
+- `lucide-react` — icon library
+- `sonner` — toast notifications
+- `recharts` — data visualization
 
-## 📊 Database Schema
+## Database Schema (Convex)
 
-### **Core Tables**
+### **Auth Tables** (managed by `@convex-dev/auth`)
 
-- `user` - User accounts and profiles
-- `session` - Active user sessions
-- `account` - OAuth accounts and passwords
-- `verification` - Email verification tokens
+- `users` — User accounts and profiles
+- `sessions` — Active user sessions
+- `accounts` — OAuth accounts and credential records
+- `verificationCodes` — Email/OTP verification tokens
+- `refreshTokens` — Auth refresh token management
 
 ### **Community Management**
 
-- `community` - Savings communities with settings and policies
-- `community_members` - Membership and role management
-- `community_invitations` - Flexible invitation system (email/link/code)
+- `communities` — Savings communities with settings and policies
+- `memberships` — Membership and role management
+- `invites` — Flexible invitation system (email/token)
 
-### **Subscription & Billing**
+### **Contributions**
 
-- `plan` - Subscription tiers with feature flags
-- `subscription_types` - Flexible billing cycles (monthly, yearly, custom)
-- `user_subscriptions` - User subscription tracking
+- `contribution` — Contribution records with status tracking
 
-## 🎯 Subscription Plans
+## Subscription Plans
 
 ### **Free Plan**
 
 - 1 community maximum
-- 10 members per community
+- 30 members per community
 - Basic reporting and email notifications
 - Contribution tracking
 
 ### **Basic Plan**
 
-- 5 communities maximum
+- 1 communities maximum
 - 50 members per community
 - Advanced reporting and SMS notifications
 - Loan management features
@@ -103,12 +107,12 @@ Jamii Save is a digital platform that enables communities to organize collective
 - Custom branding and priority support
 - API access for integrations
 
-## 🔧 Development Setup
+## Development Setup
 
 ### **Prerequisites**
 
 - Node.js 18+ or Bun
-- PostgreSQL database (Neon recommended)
+- A Convex account ([convex.dev](https://convex.dev))
 - Git
 
 ### **Installation**
@@ -119,74 +123,64 @@ git clone <repository-url>
 cd jamii-save
 
 # Install dependencies
-bun install
+npm install   # or bun install
 
 # Set up environment variables
 cp .env.example .env.local
-# Edit .env.local with your database and auth configuration
+# Edit .env.local with your Convex deployment URL and auth configuration
 
-# Run database migrations
-bun run db:migrate
-
-# Start development server
-bun run dev
+# Start the development server (frontend + backend in parallel)
+npm run dev
 ```
 
 ### **Environment Variables**
 
 ```env
-# Database
-DATABASE_URL=your_neon_database_url
-
-# Authentication
-BETTER_AUTH_SECRET=your_secret_key_here
-BETTER_AUTH_URL=http://localhost:3000
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+# Convex
+VITE_CONVEX_URL=https://<your-deployment>.convex.cloud
 ```
 
-## 🏗️ Architecture
+## Architecture
 
 ### **Authentication Flow**
 
-- Better-Auth handles user registration, login, and session management
-- JWT tokens for secure API access
-- Automatic session refresh and validation
-- Support for multiple OAuth providers
+- `@convex-dev/auth` handles user registration, login, and session management on top of Convex
+- JWTs are issued by Convex and verified server-side in every query/mutation
+- `ConvexProvider` + `ConvexAuthProvider` wrap the app for real-time auth state
+- `ctx.auth.getUserIdentity()` is used server-side to authorize all protected operations
 
-### **Database Design**
+### **Data Layer**
 
-- **Type Safety**: Drizzle ORM provides compile-time type checking
-- **Flexible Schema**: JSONB fields for extensible feature management
-- **Audit Trails**: Complete timestamp tracking on all entities
-- **Data Integrity**: Enum constraints and foreign key relationships
+- All data lives in Convex's managed database — no external database required
+- Queries and mutations are fully type-safe using Convex validators and generated types
+- Real-time subscriptions keep the UI in sync automatically
 
 ### **Community Management**
 
 - **Plan-Based Limits**: Subscription tiers control community and member limits
-- **Flexible Invitations**: Support for email, link, and code-based invitations
+- **Flexible Invitations**: Support for email and token-based invitations
 - **Role Management**: Extensible role system for different permission levels
 - **Settings Management**: Configurable contribution and loan policies
 
-## 🚀 Deployment
+## Deployment
 
-### **Database Migration**
+### **Convex Backend**
 
 ```bash
-# Generate migration files
-bun run db:generate
-
-# Apply migrations
-bun run db:migrate
+# Deploy backend to production
+npx convex deploy
 ```
 
-### **Production Deployment**
+### **Frontend**
 
-- Deploy to Vercel, Netlify, or your preferred platform
-- Configure environment variables for production
-- Set up database backups and monitoring
-- Configure domain and SSL certificates
+```bash
+# Build for production
+npm run build
+```
 
-## 📈 Future Roadmap
+Deploy the `dist/` output to Vercel, Netlify, or any static hosting provider. Set the `VITE_CONVEX_URL` environment variable to your production Convex deployment URL.
+
+## Future Roadmap
 
 ### **Phase 2: Advanced Features**
 
@@ -202,7 +196,7 @@ bun run db:migrate
 - White-label solutions
 - Enterprise support and SLA
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -210,14 +204,14 @@ bun run db:migrate
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## Support
 
 For support, email support@jamii-save.com or join our community Discord server.
 
 ---
 
-**Built with ❤️ for communities worldwide**
+**Built with love for communities worldwide**

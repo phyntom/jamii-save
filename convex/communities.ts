@@ -68,19 +68,37 @@ export const update = mutation({
     country: v.string(),
     description: v.optional(v.string()),
     isActive: v.boolean(),
+    logo: v.optional(v.id("_storage")),
   },
   handler: async (ctx, { id, ...fields }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthenticated");
+    // Delete old logo if it's being replaced
+    if (fields.logo !== undefined) {
+      const existing = await ctx.db.get(id);
+      if (existing?.logo && existing.logo !== fields.logo) {
+        await ctx.storage.delete(existing.logo);
+      }
+    }
     await ctx.db.patch(id, fields);
   },
 });
 
-export const uploadFile = mutation({
+export const generateUploadUrl = mutation({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthenticated");
     const fileId = await ctx.storage.generateUploadUrl();
     return fileId;
+  },
+});
+
+export const getLogoUrl = query({
+  args: {
+    storageId: v.optional(v.id("_storage")),
+  },
+  handler: async (ctx, { storageId }) => {
+    if (!storageId) return null;
+    return ctx.storage.getUrl(storageId);
   },
 });

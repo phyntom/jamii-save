@@ -12,18 +12,23 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import {
-  LayoutDashboard,
-  PiggyBank,
-  HandCoins,
-  Users,
-  ClipboardCheck,
-  Settings,
-  LogOut,
-  ChevronRight,
-} from "lucide-react";
+  IconLayoutDashboard,
+  IconWallet,
+  IconCoins,
+  IconUsers,
+  IconClipboardCheck,
+  IconSettings,
+  IconLogout,
+  IconChevronRight,
+  IconHelpCircle,
+  IconCalendar,
+  IconSitemap,
+} from "@tabler/icons-react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { Doc } from "../../../convex/_generated/dataModel";
+import { Doc, Id } from "convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 interface Props {
   community: Doc<"communities">;
@@ -33,38 +38,58 @@ interface Props {
 const MEMBER_NAV = [
   {
     label: "Overview",
-    icon: LayoutDashboard,
+    icon: IconLayoutDashboard,
     path: "", // /communities/:slug
   },
   {
     label: "My contributions",
-    icon: PiggyBank,
+    icon: IconWallet,
     path: "/contribute",
   },
   {
     label: "Request a loan",
-    icon: HandCoins,
+    icon: IconCoins,
     path: "/request",
     disabled: true, // future feature
+  },
+  {
+    label: "Get help",
+    icon: IconHelpCircle,
+    path: "/admin/help",
+  },
+  {
+    label: "Payment Schedule",
+    icon: IconCalendar,
+    path: "/payment-schedule",
   },
 ];
 
 const ADMIN_NAV = [
   {
+    label: "Community settings",
+    icon: IconSitemap,
+    path: "/admin/edit",
+  },
+  {
     label: "Members",
-    icon: Users,
+    icon: IconUsers,
     path: "/admin/members",
   },
   {
     label: "Contributions",
-    icon: ClipboardCheck,
+    icon: IconClipboardCheck,
     path: "/admin/contributions",
     badge: "pending", // we'll pass the count dynamically later
   },
   {
     label: "Settings",
-    icon: Settings,
+    icon: IconSettings,
     path: "/admin/settings",
+  },
+  {
+    label: "Get help",
+    icon: IconHelpCircle,
+    path: "/admin/help",
   },
 ];
 
@@ -72,6 +97,11 @@ export function MainSidebar({ community, role }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuthActions();
+  const logoUrl = useQuery(api.communities.getLogoUrl, {
+    storageId: community.logo as Id<"_storage"> | undefined,
+  });
+
+  console.log("logoUrl", logoUrl);
 
   const isAdmin = role === "owner" || role === "admin";
   const base = `/communities/${community.slug}`;
@@ -102,7 +132,18 @@ export function MainSidebar({ community, role }: Props) {
               tooltip="Back to dashboard"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-xs font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-300 font-mono flex-shrink-0">
-                {initials}
+                {logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt={community.name}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                    loading="lazy"
+                  />
+                ) : (
+                  initials
+                )}
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
                 <span className="font-medium text-sm truncate">
@@ -112,7 +153,7 @@ export function MainSidebar({ community, role }: Props) {
                   @{community.slug}
                 </span>
               </div>
-              <ChevronRight className="ml-auto w-4 h-4 text-muted-foreground" />
+              <IconChevronRight className="ml-auto w-4 h-4 text-muted-foreground" />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -178,7 +219,7 @@ export function MainSidebar({ community, role }: Props) {
               onClick={() => signOut()}
               className="text-muted-foreground hover:text-foreground"
             >
-              <LogOut className="w-4 h-4" />
+              <IconLogout className="w-4 h-4" />
               <span>Sign out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>

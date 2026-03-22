@@ -28,7 +28,7 @@ export default function App() {
         </Route>
         <Route path="/communities/:slug" element={<MainLayout />}>
           <Route index element={<Dashboard />} />
-          <Route path="/communities/:slug/manage" element={<CommunityEdit />} />
+          <Route path="admin/edit" element={<CommunityEdit />} />
           <Route path="contribute" element={<Contribute />} />
           <Route path="request" element={<RequestFund />} />
 

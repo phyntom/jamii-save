@@ -1,4 +1,7 @@
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { Link } from "react-router";
+import { Id } from "convex/_generated/dataModel";
 
 interface CommunityCardProps {
   _id: string;
@@ -23,13 +26,16 @@ export function CommunityCard({
     .slice(0, 2)
     .join("")
     .toUpperCase();
+  const logoUrl = useQuery(api.communities.getLogoUrl, {
+    storageId: logo as Id<"_storage"> | undefined,
+  });
 
   return (
-    <div className="bg-background border border-border/50 rounded-xl p-5 flex flex-col gap-3 hover:border-border transition-colors cursor-pointer">
+    <div className="bg-card border border-border/50 rounded-xl p-5 flex flex-col gap-3 hover:border-border transition-colors cursor-pointer">
       <div className="flex items-start justify-between gap-2">
         {logo ? (
           <img
-            src={logo}
+            src={logoUrl ?? undefined}
             alt={name}
             className="w-10 h-10 rounded-[10px] object-cover"
           />
@@ -63,7 +69,7 @@ export function CommunityCard({
       <div className="flex items-center justify-between pt-2.5 border-t border-border/50">
         <span className="text-xs text-muted-foreground">Community</span>
         <Link
-          to={`/communities/${slug}/manage`}
+          to={`/communities/${slug}/admin/edit`}
           className="text-xs font-medium text-blue-600 dark:text-blue-400"
         >
           Manage →

@@ -12,6 +12,8 @@ import type * as auth from "../auth.js";
 import type * as communities from "../communities.js";
 import type * as error from "../error.js";
 import type * as http from "../http.js";
+import type * as inviteActions from "../inviteActions.js";
+import type * as invites from "../invites.js";
 import type * as memberships from "../memberships.js";
 import type * as users from "../users.js";
 
@@ -26,6 +28,8 @@ declare const fullApi: ApiFromModules<{
   communities: typeof communities;
   error: typeof error;
   http: typeof http;
+  inviteActions: typeof inviteActions;
+  invites: typeof invites;
   memberships: typeof memberships;
   users: typeof users;
 }>;

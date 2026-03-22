@@ -1,19 +1,19 @@
 export type Country = {
-  code: string;
+  value: string;
   label: string;
 };
 
 export const COUNTRIES: Country[] = [
-  { code: "CA", label: "Canada" },
-  { code: "US", label: "United States" },
-  { code: "RW", label: "Rwanda" },
-  { code: "KE", label: "Kenya" },
-  { code: "BE", label: "Belgium" },
-  { code: "FR", label: "France" },
+  { value: "CA", label: "Canada" },
+  { value: "US", label: "United States" },
+  { value: "RW", label: "Rwanda" },
+  { value: "KE", label: "Kenya" },
+  { value: "BE", label: "Belgium" },
+  { value: "FR", label: "France" },
 ];
 
 /** Ready-to-use options for `FormSelect` */
-export const COUNTRY_OPTIONS = COUNTRIES.map(({ code, label }) => ({
-  value: code,
+export const COUNTRY_OPTIONS = COUNTRIES.map(({ value, label }) => ({
+  value,
   label,
 }));

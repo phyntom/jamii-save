@@ -64,7 +64,7 @@ export default function Overview() {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="bg-muted/50 rounded-lg p-4">
+    <div className="bg-secondary border rounded-lg p-4">
       <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium mb-1.5">
         {label}
       </p>
