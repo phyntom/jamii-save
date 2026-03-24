@@ -16,7 +16,17 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 .idea
+.cursor/
 .DS_Store
+
+# Claude Code / AI tooling
+.claude/
+.agents/
+skills-lock.json
+convex/_generated/ai/
+
+# npm lockfile (project uses bun)
+package-lock.json
 *.suo
 *.ntvs*
 *.njsproj
