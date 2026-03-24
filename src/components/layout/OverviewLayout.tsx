@@ -10,6 +10,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function OverviewLayout() {
   const featuresId = useId();
@@ -26,35 +27,69 @@ export default function OverviewLayout() {
   }
   return (
     <>
-      <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="shrink-0">
               <img src="/logo.png" alt="Logo" className="h-8 w-auto" />
             </div>
-            {!isLoggedIn && (
+            {isLoggedIn ? (
+              <div className="hidden md:flex items-center space-x-8">
+                <NavLink
+                  to="/overview"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground"
+                  }
+                >
+                  Dashboard
+                </NavLink>
+                <NavLink
+                  to="/contributions"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground"
+                  }
+                >
+                  Contributions
+                </NavLink>
+                <NavLink
+                  to="/loans"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground"
+                  }
+                >
+                  Loans
+                </NavLink>
+              </div>
+            ) : (
               <div className="hidden md:flex items-center space-x-8">
                 <NavLink
                   to={`#${featuresId}`}
-                  className="text-gray-600 hover:text-gray-900"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   Features
                 </NavLink>
                 <NavLink
                   to={`#${pricingId}`}
-                  className="text-gray-600 hover:text-gray-900"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   Pricing
                 </NavLink>
                 <NavLink
                   to={`#${testimonialsId}`}
-                  className="text-gray-600 hover:text-gray-900"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   Testimonials
                 </NavLink>
               </div>
             )}
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               {isLoggedIn ? (
                 <Button variant="ghost" onClick={async () => handleSignOut()}>
                   Sign Out

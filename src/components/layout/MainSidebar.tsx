@@ -24,7 +24,9 @@ import {
   IconCalendar,
   IconSitemap,
 } from "@tabler/icons-react";
+import { Moon, Sun } from "lucide-react";
 import { useNavigate, useLocation } from "react-router";
+import { useTheme } from "@/hooks/useTheme";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Doc, Id } from "convex/_generated/dataModel";
 import { useQuery } from "convex/react";
@@ -97,6 +99,7 @@ export function MainSidebar({ community, role }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuthActions();
+  const { theme, toggleTheme } = useTheme();
   const logoUrl = useQuery(api.communities.getLogoUrl, {
     storageId: community.logo as Id<"_storage"> | undefined,
   });
@@ -214,6 +217,20 @@ export function MainSidebar({ community, role }: Props) {
       {/* User footer */}
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={toggleTheme}
+              tooltip={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
+              <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => signOut()}
