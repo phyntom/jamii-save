@@ -6,6 +6,7 @@ import {
   query,
 } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
 
 // ── Queries ───────────────────────────────────────────────────────────────────
 
@@ -62,7 +63,10 @@ export const insertInvite = internalMutation({
     expiresAt: v.number(),
   },
   handler: async (ctx, args) => {
-    return ctx.db.insert("invites", { ...args, status: "pending" });
+    const invitationId = await ctx.db.insert("invites", {
+      ...args,
+      status: "pending",
+    });
   },
 });
 

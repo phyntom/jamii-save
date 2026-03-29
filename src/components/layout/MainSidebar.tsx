@@ -101,8 +101,6 @@ export function MainSidebar({ community, role }: Props) {
     storageId: community.logo as Id<"_storage"> | undefined,
   });
 
-  console.log("logoUrl", logoUrl);
-
   const isAdmin = role === "owner" || role === "admin";
   const base = `/communities/${community.slug}`;
 

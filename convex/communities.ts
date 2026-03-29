@@ -1,6 +1,9 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
+import { logActivity } from "./activities";
+import { ACTIONS } from "./constants";
 
 export const getById = query({
   args: {
@@ -27,7 +30,7 @@ export const getBySlug = query({
   },
 });
 
-export const create = mutation({
+export const createCommunity = mutation({
   args: {
     name: v.string(),
     slug: v.string(),
@@ -56,31 +59,36 @@ export const create = mutation({
       role: "owner",
       joinedAt: Date.now(),
     });
-
+    await logActivity(ctx, {
+      communityId,
+      entity: "community",
+      action: ACTIONS.CREATED,
+      metadata: `${userId} created ${args.name}`,
+    });
     return communityId;
   },
 });
 
-export const update = mutation({
+export const updateCommunity = mutation({
   args: {
-    id: v.id("communities"),
+    communityId: v.id("communities"),
     name: v.string(),
     country: v.string(),
     description: v.optional(v.string()),
     isActive: v.boolean(),
     logo: v.optional(v.id("_storage")),
   },
-  handler: async (ctx, { id, ...fields }) => {
+  handler: async (ctx, { communityId, ...fields }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthenticated");
-    // Delete old logo if it's being replaced
     if (fields.logo !== undefined) {
-      const existing = await ctx.db.get(id);
+      const existing = await ctx.db.get(communityId);
       if (existing?.logo && existing.logo !== fields.logo) {
         await ctx.storage.delete(existing.logo);
       }
     }
-    await ctx.db.patch(id, fields);
+    await ctx.db.patch(communityId, fields);
+    return communityId;
   },
 });
 
