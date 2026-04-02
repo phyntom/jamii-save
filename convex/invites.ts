@@ -66,6 +66,7 @@ export const insertInvite = internalMutation({
       ...args,
       status: "pending",
     });
+    return invitationId;
   },
 });
 

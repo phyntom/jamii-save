@@ -34,7 +34,7 @@ type MemberWithUser = Doc<"memberships"> & {
 };
 
 type ActivityLogWithUser = Doc<"activity"> & {
-  user: Doc<"users"> | null;
+  userEmail: string | null;
 };
 
 const inviteSchema = z.object({
