@@ -80,9 +80,7 @@ export function InvitesTab({
         header: "Email",
         accessorKey: "email",
         cell: ({ row }) => (
-          <span className="font-mono text-xs">
-            {row.getValue("email")}
-          </span>
+          <span className="font-mono text-xs">{row.getValue("email")}</span>
         ),
       },
       {
