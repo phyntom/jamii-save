@@ -45,10 +45,9 @@ function toSlug(name: string) {
     .replace(/^-|-$/g, "");
 }
 
-
 export default function CommunityForm() {
   const navigate = useNavigate();
-  const createCommunity = useMutation(api.communities.create);
+  const createCommunity = useMutation(api.communities.createCommunity);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),

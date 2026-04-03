@@ -62,7 +62,11 @@ export const insertInvite = internalMutation({
     expiresAt: v.number(),
   },
   handler: async (ctx, args) => {
-    return ctx.db.insert("invites", { ...args, status: "pending" });
+    const invitationId = await ctx.db.insert("invites", {
+      ...args,
+      status: "pending",
+    });
+    return invitationId;
   },
 });
 

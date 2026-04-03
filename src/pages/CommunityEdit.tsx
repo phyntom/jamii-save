@@ -43,7 +43,7 @@ export default function CommunityEdit() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const uploadFile = useMutation(api.communities.generateUploadUrl);
-  const updateCommunity = useMutation(api.communities.update);
+  const updateCommunity = useMutation(api.communities.updateCommunity);
   const { community } = useOutletContext<OutletContext>();
 
   const form = useForm<FormValues>({
@@ -90,7 +90,7 @@ export default function CommunityEdit() {
         storageId = id;
       }
       await updateCommunity({
-        id: community._id,
+        communityId: community._id,
         name: data.name,
         description: data.description,
         isActive: data.isActive,

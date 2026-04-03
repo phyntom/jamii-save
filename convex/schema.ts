@@ -49,4 +49,15 @@ export default defineSchema({
     payment_method: v.string(),
     status: v.string(),
   }).index("communityId", ["communityId"]),
+  activity: defineTable({
+    communityId: v.id("communities"),
+    userId: v.id("users"),
+    action: v.string(),
+    entity: v.string(),
+    metadata: v.optional(v.string()),
+  })
+    .index("communityId", ["communityId"])
+    .index("entity", ["entity"])
+    .index("action", ["action"])
+    .index("userId", ["userId"]),
 });

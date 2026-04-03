@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useAction } from "convex/react";
+import { useQuery, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import { useForm } from "react-hook-form";
@@ -6,14 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { toast } from "sonner";
-import {
-  UserPlus,
-  Mail,
-  Users,
-  Activity,
-  MoreHorizontal,
-  ArrowLeft,
-} from "lucide-react";
+import { UserPlus, Mail, Users, Activity, ArrowLeft } from "lucide-react";
 import { OutletContext } from "@/types";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -25,24 +18,12 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
+import { FormInput } from "@/components/FormInput";
 import { Doc } from "convex/_generated/dataModel";
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+import { MembersTab } from "@/components/MembersTab";
+import { InvitesTab } from "@/components/InvitesTab";
+import { ActivityLogsTab } from "@/components/ActivityLogsTab";
 
 type InviteWithUser = Doc<"invites"> & {
   invitedByUser: Doc<"users"> | null;
@@ -52,57 +33,14 @@ type MemberWithUser = Doc<"memberships"> & {
   user: Doc<"users"> | null;
 };
 
-// ── Invite form schema ────────────────────────────────────────────────────────
+type ActivityLogWithUser = Doc<"activity"> & {
+  userEmail: string | null;
+};
 
 const inviteSchema = z.object({
   email: z.string().email("Enter a valid email address"),
 });
 type InviteFormValues = z.infer<typeof inviteSchema>;
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function formatDate(ts: number) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(ts));
-}
-
-function roleBadge(role: string) {
-  const map: Record<string, string> = {
-    owner:
-      "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
-    admin: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
-    treasurer:
-      "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-    secretary: "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
-    member: "bg-muted text-muted-foreground",
-  };
-  return map[role] ?? map.member;
-}
-
-function statusBadge(status: string) {
-  const map: Record<string, string> = {
-    pending: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-    confirmed:
-      "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300",
-    declined: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
-  };
-  return map[status] ?? "bg-muted text-muted-foreground";
-}
-
-function initials(name?: string | null) {
-  if (!name) return "?";
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
-// ── InviteDialog ─────────────────────────────────────────────────────────────
 
 interface InviteDialogProps {
   open: boolean;
@@ -157,23 +95,13 @@ function InviteDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
+            <FormInput
               control={form.control}
               name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email address</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="colleague@example.com"
-                      autoComplete="off"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Email address"
+              type="email"
+              placeHolder="colleague@example.com"
+              autoComplete="off"
             />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
@@ -190,215 +118,6 @@ function InviteDialog({
   );
 }
 
-// ── InvitesTab ────────────────────────────────────────────────────────────────
-
-interface InvitesTabProps {
-  invites: InviteWithUser[];
-  communityName: string;
-  inviterName: string;
-}
-
-function InvitesTab({ invites, communityName, inviterName }: InvitesTabProps) {
-  const cancelInvite = useMutation(api.invites.cancelInvite);
-  const resendInvite = useAction(api.inviteActions.resendInvite);
-  const [resending, setResending] = useState<string | null>(null);
-
-  async function handleResend(invite: InviteWithUser) {
-    setResending(invite._id);
-    try {
-      await resendInvite({
-        inviteId: invite._id,
-        communityName,
-        inviterName,
-      });
-      toast.success(`Invite resent to ${invite.email}`);
-    } catch {
-      toast.error("Failed to resend invite.");
-    } finally {
-      setResending(null);
-    }
-  }
-
-  async function handleCancel(inviteId: Doc<"invites">["_id"]) {
-    try {
-      await cancelInvite({ inviteId });
-      toast.success("Invite cancelled.");
-    } catch {
-      toast.error("Failed to cancel invite.");
-    }
-  }
-
-  if (invites.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 gap-2 border border-dashed border-border rounded-xl">
-        <Mail className="w-8 h-8 text-muted-foreground/50" />
-        <p className="text-sm font-medium text-foreground">No invites yet</p>
-        <p className="text-xs text-muted-foreground">
-          Invited members will appear here.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="border border-border/50 rounded-xl overflow-hidden">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border/50 bg-muted/30">
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Email
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Status
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Invited by
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Expires
-            </th>
-            <th className="px-4 py-3" />
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border/50">
-          {invites.map((invite) => (
-            <tr
-              key={invite._id}
-              className="bg-background hover:bg-muted/20 transition-colors"
-            >
-              <td className="px-4 py-3 font-mono text-xs text-foreground">
-                {invite.email}
-              </td>
-              <td className="px-4 py-3">
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium ${statusBadge(invite.status)}`}
-                >
-                  {invite.status.charAt(0).toUpperCase() +
-                    invite.status.slice(1)}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-muted-foreground text-xs">
-                {invite.invitedByUser?.name ?? "—"}
-              </td>
-              <td className="px-4 py-3 text-muted-foreground text-xs">
-                {invite.expiresAt < Date.now() ? (
-                  <span className="text-red-500">Expired</span>
-                ) : (
-                  formatDate(invite.expiresAt)
-                )}
-              </td>
-              <td className="px-4 py-3 text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="p-1 rounded hover:bg-muted transition-colors">
-                      <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {invite.status === "pending" && (
-                      <DropdownMenuItem
-                        onClick={() => handleResend(invite)}
-                        disabled={resending === invite._id}
-                      >
-                        {resending === invite._id ? "Resending…" : "Resend"}
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem
-                      onClick={() => handleCancel(invite._id)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      Cancel invite
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-// ── MembersTab ────────────────────────────────────────────────────────────────
-
-function MembersTab({ members }: { members: MemberWithUser[] }) {
-  if (members.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 gap-2 border border-dashed border-border rounded-xl">
-        <Users className="w-8 h-8 text-muted-foreground/50" />
-        <p className="text-sm font-medium text-foreground">No members yet</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="border border-border/50 rounded-xl overflow-hidden">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border/50 bg-muted/30">
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Member
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Role
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Joined
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border/50">
-          {members.map((m) => (
-            <tr
-              key={m._id}
-              className="bg-background hover:bg-muted/20 transition-colors"
-            >
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-950 flex items-center justify-center text-xs font-medium text-blue-700 dark:text-blue-300 font-mono shrink-0">
-                    {initials(m.user?.name)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground leading-none">
-                      {m.user?.name ?? "Unknown"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {m.user?.email ?? "—"}
-                    </p>
-                  </div>
-                </div>
-              </td>
-              <td className="px-4 py-3">
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium ${roleBadge(m.role)}`}
-                >
-                  {m.role.charAt(0).toUpperCase() + m.role.slice(1)}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-xs text-muted-foreground">
-                {formatDate(m.joinedAt)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-// ── ActivityLogsTab ───────────────────────────────────────────────────────────
-
-function ActivityLogsTab() {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 gap-2 border border-dashed border-border rounded-xl">
-      <Activity className="w-8 h-8 text-muted-foreground/50" />
-      <p className="text-sm font-medium text-foreground">Activity logs</p>
-      <p className="text-xs text-muted-foreground">Coming soon.</p>
-    </div>
-  );
-}
-
 // ── Members page ──────────────────────────────────────────────────────────────
 
 export default function Members() {
@@ -410,6 +129,10 @@ export default function Members() {
   const currentUser = useQuery(api.users.currentUser);
 
   const membersData = useQuery(api.memberships.getCommunityMembers, {
+    communityId: community._id,
+  });
+
+  const activityLogsData = useQuery(api.activities.getActivitiesByCommunity, {
     communityId: community._id,
   });
 
@@ -432,6 +155,7 @@ export default function Members() {
 
   const members = (membersData ?? []) as MemberWithUser[];
   const invites = (invitesData ?? []) as InviteWithUser[];
+  const activityLogs = (activityLogsData ?? []) as ActivityLogWithUser[];
   const inviterName = currentUser?.name ?? "A community admin";
 
   // Show tabs when there are other members besides the owner OR any invites exist
@@ -509,7 +233,7 @@ export default function Members() {
           </TabsContent>
 
           <TabsContent value="activity">
-            <ActivityLogsTab />
+            <ActivityLogsTab activityLogs={activityLogs} />
           </TabsContent>
         </Tabs>
       )}
