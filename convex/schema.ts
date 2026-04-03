@@ -57,7 +57,7 @@ export default defineSchema({
     metadata: v.optional(v.string()),
   })
     .index("communityId", ["communityId"])
-    .index("by_entity", ["entity"])
-    .index("by_action", ["action"])
-    .index("by_userId", ["userId"]),
+    .index("entity", ["entity"])
+    .index("action", ["action"])
+    .index("userId", ["userId"]),
 });
