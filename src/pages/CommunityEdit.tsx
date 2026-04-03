@@ -90,7 +90,7 @@ export default function CommunityEdit() {
         storageId = id;
       }
       await updateCommunity({
-        id: community._id,
+        communityId: community._id,
         name: data.name,
         description: data.description,
         isActive: data.isActive,
