@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,7 +43,7 @@ export default function CommunityEdit() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const uploadFile = useMutation(api.communities.generateUploadUrl);
-  const updateCommunity = useMutation(api.communities.update);
+  const updateCommunity = useMutation(api.communities.updateCommunity);
   const { community } = useOutletContext<OutletContext>();
 
   const form = useForm<FormValues>({
@@ -90,7 +90,7 @@ export default function CommunityEdit() {
         storageId = id;
       }
       await updateCommunity({
-        id: community._id,
+        communityId: community._id,
         name: data.name,
         description: data.description,
         isActive: data.isActive,

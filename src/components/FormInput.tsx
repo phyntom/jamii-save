@@ -154,6 +154,16 @@ export function FormInput<
               disabled={disabled}
               className={inputClassName}
               {...field}
+              onChange={
+                type === "number"
+                  ? (e) =>
+                      field.onChange(
+                        e.target.value === ""
+                          ? undefined
+                          : e.target.valueAsNumber,
+                      )
+                  : field.onChange
+              }
             />
           </FormControl>
           {description && <FormDescription>{description}</FormDescription>}

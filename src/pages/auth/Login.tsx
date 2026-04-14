@@ -121,6 +121,14 @@ export default function Login({ provider }: LoginProps) {
                           type="password"
                           autoComplete="email webauthn"
                         />
+                        <div className="flex justify-end">
+                          <Link
+                            to="/forgot-password"
+                            className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                          >
+                            Forgot password?
+                          </Link>
+                        </div>
                       </div>
                       <Button
                         type="submit"

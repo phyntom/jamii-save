@@ -10,6 +10,9 @@ export default defineSchema({
     logo: v.optional(v.string()),
     slug: v.string(),
     createdBy: v.id("users"),
+    targetAmount: v.optional(v.number()),
+    currency: v.optional(v.string()),
+    contributionFrequency: v.optional(v.string()),
     isActive: v.boolean(),
     country: v.optional(v.string()),
     metadata: v.optional(v.string()),
@@ -49,4 +52,15 @@ export default defineSchema({
     payment_method: v.string(),
     status: v.string(),
   }).index("communityId", ["communityId"]),
+  activity: defineTable({
+    communityId: v.id("communities"),
+    userId: v.id("users"),
+    action: v.string(),
+    entity: v.string(),
+    metadata: v.optional(v.string()),
+  })
+    .index("communityId", ["communityId"])
+    .index("entity", ["entity"])
+    .index("action", ["action"])
+    .index("userId", ["userId"]),
 });
