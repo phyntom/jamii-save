@@ -20,6 +20,9 @@ import { FormInput } from "@/components/FormInput";
 import { CommunityPreview } from "@/components/CommunityPreview";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { CURRENCY_OPTIONS } from "@/constants/currencies";
+import { CONTRIBUTION_FREQUENCY_OPTIONS } from "@/constants/contributionFrequencies";
+import { FormSelect } from "@/components/FormSelect";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required").max(60),
@@ -33,6 +36,9 @@ const schema = z.object({
       "Lowercase letters, numbers, and hyphens only",
     ),
   description: z.string().max(280).optional(),
+  currency: z.string().max(10).optional(),
+  contributionFrequency: z.string().max(20).optional(),
+  targetAmount: z.number().optional(),
   isActive: z.boolean(),
 });
 
@@ -56,6 +62,9 @@ export default function CommunityForm() {
       country: "",
       slug: "",
       description: "",
+      currency: "",
+      contributionFrequency: "",
+      targetAmount: undefined,
       isActive: true,
     },
   });
@@ -168,10 +177,12 @@ export default function CommunityForm() {
             />
           </div>
 
-          <div className="bg-background border border-border/50 rounded-xl p-6">
+          <div className="bg-background border border-border/50 rounded-xl p-6 space-y-4">
             <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mb-4">
               Settings
             </p>
+
+            {/* active field */}
             <FormField
               control={form.control}
               name="isActive"
@@ -194,6 +205,37 @@ export default function CommunityForm() {
                 </FormItem>
               )}
             />
+            {/* end of active field */}
+
+            <FormSelect
+              control={form.control}
+              name="currency"
+              label="Currency"
+              options={CURRENCY_OPTIONS}
+              placeholder="Select a currency"
+              className="w-full"
+            />
+
+            {/* target amount field */}
+            <FormInput
+              control={form.control}
+              name="targetAmount"
+              label="Target amount (optional)"
+              placeHolder="e.g. 5000"
+              type="number"
+            />
+            {/* end of target amount field */}
+
+            {/* contribution frequency field */}
+            <FormSelect
+              control={form.control}
+              name="contributionFrequency"
+              label="Contribution Frequency"
+              options={CONTRIBUTION_FREQUENCY_OPTIONS}
+              placeholder="Select a frequency"
+              className="w-full"
+            />
+            {/* end of contribution frequency field */}
           </div>
 
           <CommunityPreview

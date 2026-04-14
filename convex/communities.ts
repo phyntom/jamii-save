@@ -37,7 +37,7 @@ export const createCommunity = mutation({
     description: v.optional(v.string()),
     country: v.string(),
     currency: v.string(),
-    targetAmount: v.number(),
+    targetAmount: v.optional(v.number()),
     contributionFrequency: v.optional(v.string()),
     isActive: v.boolean(),
   },
