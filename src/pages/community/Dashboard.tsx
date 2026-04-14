@@ -1,212 +1,136 @@
-import { useParams } from "react-router";
+import { useOutletContext } from "react-router";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import { OutletContext } from "@/types";
+import { StatsCard } from "@/components/ui/StatsCard";
+import { MembersList } from "@/components/MembersList";
+import { Badge } from "@/components/ui/badge";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
+import {
+  Users,
+  Activity,
+  Mail,
+  DollarSign,
+  Clock3,
+} from "lucide-react";
+import { Doc } from "convex/_generated/dataModel";
 
-// Placeholder types — replace with your Convex query return types
-type StatCard = { label: string; value: string; delta: string; down?: boolean };
-type Member = {
-  id: string;
-  initials: string;
-  name: string;
-  role: string;
-  joinedAt: string;
-};
-type Activity = {
-  id: string;
-  type: "post" | "member" | "event";
-  text: string;
-  highlight: string;
-  time: string;
-};
-type Category = { name: string; count: number; pct: number };
-
-// ─── Placeholder data (swap with useQuery hooks) ────────────────────────────
-
-const STATS: StatCard[] = [
-  { label: "Total members", value: "1,248", delta: "+12 this week" },
-  { label: "Posts this week", value: "84", delta: "+6 vs last week" },
-  { label: "Active today", value: "37", delta: "−4 vs yesterday", down: true },
-  { label: "Upcoming events", value: "3", delta: "next in 2 days" },
-];
-
-const MEMBERS: Member[] = [
-  {
-    id: "1",
-    initials: "SL",
-    name: "Sophie L.",
-    role: "Developer",
-    joinedAt: "2h ago",
-  },
-  {
-    id: "2",
-    initials: "MK",
-    name: "Marc K.",
-    role: "Designer",
-    joinedAt: "5h ago",
-  },
-  {
-    id: "3",
-    initials: "AR",
-    name: "Aiko R.",
-    role: "Founder",
-    joinedAt: "1d ago",
-  },
-  {
-    id: "4",
-    initials: "TN",
-    name: "Tom N.",
-    role: "Developer",
-    joinedAt: "1d ago",
-  },
-];
-
-const ACTIVITY: Activity[] = [
-  {
-    id: "1",
-    type: "post",
-    text: "Sophie posted",
-    highlight: '"Best tools for 2025"',
-    time: "2h ago",
-  },
-  {
-    id: "2",
-    type: "member",
-    text: "Marc joined the community",
-    highlight: "",
-    time: "5h ago",
-  },
-  {
-    id: "3",
-    type: "event",
-    text: "New event:",
-    highlight: "Live Q&A session",
-    time: "8h ago",
-  },
-  {
-    id: "4",
-    type: "post",
-    text: "Tom posted",
-    highlight: '"Intro: I\'m new here!"',
-    time: "1d ago",
-  },
-];
-
-const CATEGORIES: Category[] = [
-  { name: "General", count: 36, pct: 72 },
-  { name: "Showcase", count: 24, pct: 48 },
-  { name: "Help", count: 18, pct: 36 },
-  { name: "Events", count: 6, pct: 12 },
-];
-
-const CATEGORY_COLORS = ["#378ADD", "#1D9E75", "#EF9F27", "#7F77DD"];
-
-const AVATAR_STYLES = [
-  "bg-blue-100 text-blue-700",
-  "bg-green-100 text-green-700",
-  "bg-amber-100 text-amber-700",
-  "bg-red-100 text-red-700",
-];
-
-const ACTIVITY_ICONS: Record<Activity["type"], { bg: string; symbol: string }> =
-  {
-    post: { bg: "bg-blue-100", symbol: "✏" },
-    member: { bg: "bg-green-100", symbol: "+" },
-    event: { bg: "bg-amber-100", symbol: "◆" },
-  };
-
-// ─── Sub-components ──────────────────────────────────────────────────────────
-
-function StatCard({ label, value, delta, down }: StatCard) {
-  return (
-    <div className="bg-muted rounded-md p-4">
-      <p className="text-xs text-muted-foreground mb-1.5">{label}</p>
-      <p className="text-2xl font-medium">{value}</p>
-      <p
-        className={`text-xs mt-1 ${down ? "text-destructive" : "text-green-600"}`}
-      >
-        {delta}
-      </p>
-    </div>
-  );
+function formatDateTime(ts: number) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(ts));
 }
 
-function MemberRow({ member, index }: { member: Member; index: number }) {
+function ActivityRow({ log }: { log: Doc<"activity"> & { userEmail?: string } }) {
   return (
-    <div className="flex items-center gap-2.5 border-b border-border last:border-0 last:pb-0">
-      <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${
-          AVATAR_STYLES[index % AVATAR_STYLES.length]
-        }`}
-      >
-        {member.initials}
+    <div className="flex items-start gap-2.5 py-2 border-b border-border last:border-0">
+      <div className="mt-0.5 rounded-full bg-primary/10 p-1.5 shrink-0">
+        <Activity className="h-3.5 w-3.5 text-primary" />
       </div>
-      <div className="min-w-0">
-        <p className="text-sm font-medium truncate">{member.name}</p>
-        <p className="text-xs text-muted-foreground">{member.role}</p>
-      </div>
-      <p className="text-xs text-muted-foreground ml-auto shrink-0">
-        {member.joinedAt}
-      </p>
-    </div>
-  );
-}
-
-function ActivityRow({ item }: { item: Activity }) {
-  const icon = ACTIVITY_ICONS[item.type];
-  return (
-    <div className="flex items-start gap-2.5 py-2 border-b border-border last:border-0 last:pb-0">
-      <div
-        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 mt-0.5 ${icon.bg}`}
-      >
-        {icon.symbol}
-      </div>
-      <div>
+      <div className="min-w-0 flex-1">
         <p className="text-sm leading-snug">
-          {item.text}{" "}
-          {item.highlight && (
-            <span className="text-muted-foreground">{item.highlight}</span>
-          )}
+          <span className="font-medium">{log.userEmail ?? "Unknown"}</span>{" "}
+          <span className="text-muted-foreground">
+            {log.action} {log.entity}
+          </span>
         </p>
-        <p className="text-xs text-muted-foreground mt-0.5">{item.time}</p>
+        {log.metadata && (
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+            {log.metadata}
+          </p>
+        )}
+      </div>
+      <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+        <Clock3 className="h-3 w-3" />
+        <span>{formatDateTime(log._creationTime)}</span>
       </div>
     </div>
   );
 }
-
-// ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function CommunityDashboard() {
-  const { communityId } = useParams<{ communityId: string }>();
+  const { community } = useOutletContext<OutletContext>();
 
-  // TODO: replace placeholders with real queries, e.g.:
-  // const community = useQuery(api.communities.get, { id: communityId });
-  // const stats     = useQuery(api.communities.stats, { id: communityId });
-  // const members   = useQuery(api.communities.recentMembers, { id: communityId });
-  // const activity  = useQuery(api.communities.recentActivity, { id: communityId });
-  // const categories = useQuery(api.communities.topCategories, { id: communityId });
+  const members = useQuery(
+    api.memberships.getCommunityMembers,
+    community ? { communityId: community._id } : "skip",
+  );
+  const activityLogs = useQuery(
+    api.activities.getActivitiesByCommunity,
+    community ? { communityId: community._id } : "skip",
+  );
+  const invites = useQuery(
+    api.invites.getInvitesByCommunity,
+    community ? { communityId: community._id } : "skip",
+  );
 
-  const communityName = "Dev community"; // community?.name
+  const memberCount = members?.length ?? 0;
+  const activityCount = activityLogs?.length ?? 0;
+  const pendingInvites =
+    invites?.filter((i) => i.status === "pending").length ?? 0;
+  const recentActivity = activityLogs?.slice(0, 5) ?? [];
 
   return (
     <div className="mx-8 py-6 px-0 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-lg font-medium border border-border shrink-0">
-          {communityName.slice(0, 2).toUpperCase()}
+          {community?.name.slice(0, 2).toUpperCase()}
         </div>
         <div>
-          <h1 className="text-lg font-medium">{communityName}</h1>
+          <h1 className="text-lg font-medium">{community?.name}</h1>
           <p className="text-sm text-muted-foreground">Community dashboard</p>
         </div>
-        <span className="ml-auto flex items-center gap-1.5 text-xs px-2 py-1 rounded-md bg-green-100 text-green-700 border border-green-200 shrink-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-600 inline-block" />
-          Active
-        </span>
+        <Badge
+          variant="outline"
+          className={
+            community?.isActive
+              ? "ml-auto bg-green-100 text-green-700 border-green-200"
+              : "ml-auto bg-muted text-muted-foreground"
+          }
+        >
+          <span
+            className={`w-1.5 h-1.5 rounded-full inline-block mr-1.5 ${community?.isActive ? "bg-green-600" : "bg-muted-foreground"}`}
+          />
+          {community?.isActive ? "Active" : "Inactive"}
+        </Badge>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        {STATS.map((s) => (
-          <StatCard key={s.label} {...s} />
-        ))}
+        <StatsCard
+          label="Total Members"
+          value={memberCount}
+          description={`${memberCount} ${memberCount === 1 ? "member" : "members"} in this community`}
+          icon={Users}
+        />
+        <StatsCard
+          label="Activity"
+          value={activityCount}
+          description="Total logged actions"
+          icon={Activity}
+        />
+        <StatsCard
+          label="Pending Invites"
+          value={pendingInvites}
+          description="Awaiting response"
+          icon={Mail}
+        />
+        <StatsCard
+          label="Contributions"
+          value={0}
+          description="Coming soon"
+          icon={DollarSign}
+        />
       </div>
 
       {/* Recent members + activity */}
@@ -215,46 +139,32 @@ export default function CommunityDashboard() {
           <p className="text-xs font-medium text-muted-foreground mb-2">
             Recent members
           </p>
-          {MEMBERS.map((m, i) => (
-            <MemberRow key={m.id} member={m} index={i} />
-          ))}
+          <MembersList members={members ?? []} limit={5} />
         </div>
 
         <div className="rounded-xl border border-border bg-card p-4 px-5">
           <p className="text-xs font-medium text-muted-foreground mb-2">
             Recent activity
           </p>
-          {ACTIVITY.map((a) => (
-            <ActivityRow key={a.id} item={a} />
-          ))}
-        </div>
-      </div>
-
-      {/* Top categories */}
-      <div className="rounded-xl border border-border bg-card p-4 px-5">
-        <p className="text-xs font-medium text-muted-foreground mb-3">
-          Top categories
-        </p>
-        <div className="space-y-2.5">
-          {CATEGORIES.map((c, i) => (
-            <div key={c.name} className="flex items-center gap-2.5">
-              <span className="text-xs text-muted-foreground w-16 shrink-0 truncate">
-                {c.name}
-              </span>
-              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full"
-                  style={{
-                    width: `${c.pct}%`,
-                    background: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
-                  }}
-                />
-              </div>
-              <span className="text-xs text-muted-foreground w-6 text-right shrink-0">
-                {c.count}
-              </span>
+          {recentActivity.length === 0 ? (
+            <Empty className="py-8">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Activity />
+                </EmptyMedia>
+                <EmptyTitle>No activity yet</EmptyTitle>
+                <EmptyDescription>
+                  Actions will be logged here as they happen.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <div>
+              {recentActivity.map((log) => (
+                <ActivityRow key={log._id} log={log} />
+              ))}
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

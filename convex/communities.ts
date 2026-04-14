@@ -36,6 +36,9 @@ export const createCommunity = mutation({
     slug: v.string(),
     description: v.optional(v.string()),
     country: v.string(),
+    currency: v.string(),
+    targetAmount: v.number(),
+    contributionFrequency: v.optional(v.string()),
     isActive: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -93,6 +96,7 @@ export const updateCommunity = mutation({
 });
 
 export const generateUploadUrl = mutation({
+  args: {},
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthenticated");

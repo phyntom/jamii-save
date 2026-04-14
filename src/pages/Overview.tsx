@@ -1,14 +1,8 @@
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import {
-  CreditCard,
-  DollarSign,
-  Plus,
-  TrendingUp,
-  Users,
-} from "lucide-react";
+import { CreditCard, DollarSign, Plus, TrendingUp, Users } from "lucide-react";
 import { Link, useNavigate } from "react-router";
-import { CommunityCard } from "@/components/CommunityCard";
+import { StatsCard } from "@/components/ui/StatsCard";
 import {
   Card,
   CardContent,
@@ -17,11 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  getDashboardStats,
-  mockCommunities,
-  mockContributions,
-} from "@/lib/mock-data";
+import { getDashboardStats, mockContributions } from "@/lib/mock-data";
 import { formatDistanceToNow } from "date-fns";
 
 export default function Overview() {
@@ -48,10 +38,9 @@ export default function Overview() {
 
   // Community quick-view: use real data if available, fall back to mock
   const communitiesList = communities ?? [];
-  const quickViewCommunities = mockCommunities.slice(0, 3);
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
+    <div className="max-w-7xl mx-auto px-6 py-10">
       {/* Top bar */}
       <div className="flex items-start justify-between mb-10">
         <div>
@@ -66,7 +55,7 @@ export default function Overview() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <StatsCard
           label="Total Communities"
           value={communitiesList.length || stats.totalCommunities}
@@ -104,7 +93,7 @@ export default function Overview() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {quickViewCommunities.length === 0 ? (
+            {communitiesList.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">
                   You're not part of any communities yet
@@ -115,27 +104,32 @@ export default function Overview() {
               </div>
             ) : (
               <div className="space-y-3">
-                {quickViewCommunities.map((community) => (
-                  <div
-                    key={community._id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div className="min-w-0">
-                      <h3 className="font-medium text-sm truncate">
-                        {community.name}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        Target: {community.currency}{" "}
-                        {community.targetAmount.toLocaleString()}{" "}
-                        {community.contributionFrequency.toLowerCase()}
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to={`/communities/${community.slug}`}>View</Link>
-                    </Button>
-                  </div>
-                ))}
-                {mockCommunities.length > 3 && (
+                {communitiesList.map(
+                  (community) =>
+                    community && (
+                      <div
+                        key={community._id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
+                        <div className="min-w-0">
+                          <h3 className="font-medium text-sm truncate">
+                            {community.name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground">
+                            Target: {community.currency}{" "}
+                            {community.targetAmount?.toLocaleString()}{" "}
+                            {community.contributionFrequency?.toLowerCase()}
+                          </p>
+                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/communities/${community.slug}`}>
+                            View
+                          </Link>
+                        </Button>
+                      </div>
+                    ),
+                )}
+                {communitiesList.length > 3 && (
                   <Button variant="ghost" className="w-full" asChild>
                     <Link to="/overview">View all communities</Link>
                   </Button>
@@ -149,9 +143,7 @@ export default function Overview() {
         <Card>
           <CardHeader>
             <CardTitle>Recent Contributions</CardTitle>
-            <CardDescription>
-              Your latest contribution activity
-            </CardDescription>
+            <CardDescription>Your latest contribution activity</CardDescription>
           </CardHeader>
           <CardContent>
             {recentContributions.length === 0 ? (
@@ -188,52 +180,11 @@ export default function Overview() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Full community grid */}
-      <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4">
-        All communities
-      </p>
-
-      {communitiesList.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {communitiesList.map(
-            (community) =>
-              community && <CommunityCard key={community._id} {...community} />,
-          )}
-        </div>
-      ) : (
-        <EmptyState />
-      )}
     </div>
   );
 }
 
 // ── Sub-components ───────────────────────────────────────────────────
-
-function StatsCard({
-  label,
-  value,
-  description,
-  icon: Icon,
-}: {
-  label: string;
-  value: string | number;
-  description: string;
-  icon: React.ElementType;
-}) {
-  return (
-    <div className="bg-card border rounded-lg p-4">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
-          {label}
-        </p>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </div>
-      <p className="text-2xl font-medium text-foreground">{value}</p>
-      <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
-    </div>
-  );
-}
 
 function ContributionStatusBadge({
   status,
@@ -245,30 +196,7 @@ function ContributionStatusBadge({
     pending: "text-amber-600 dark:text-amber-400",
     rejected: "text-red-600 dark:text-red-400",
   };
-  return (
-    <p className={`text-xs capitalize ${styles[status]}`}>{status}</p>
-  );
-}
-
-function EmptyState() {
-  const navigate = useNavigate();
-  return (
-    <div className="flex flex-col items-center justify-center py-16 gap-3 border border-dashed border-border rounded-xl">
-      <p className="text-[15px] font-medium text-foreground">
-        No communities yet
-      </p>
-      <p className="text-sm text-muted-foreground text-center max-w-xs leading-relaxed">
-        Create your first community to start managing members and invites.
-      </p>
-      <button
-        onClick={() => navigate("/communities/new")}
-        className="mt-2 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border border-border rounded-lg bg-background hover:bg-muted transition-colors"
-      >
-        <Plus className="w-4 h-4" />
-        Create a community
-      </button>
-    </div>
-  );
+  return <p className={`text-xs capitalize ${styles[status]}`}>{status}</p>;
 }
 
 function CreateButton() {

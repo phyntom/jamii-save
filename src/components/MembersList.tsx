@@ -5,6 +5,17 @@ import { EntityTable } from "./EntityTable";
 import { Doc } from "convex/_generated/dataModel";
 import { Users } from "lucide-react";
 import { roleBadgeClass } from "@/lib/role-badge";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
+
+type MemberWithUser = Doc<"memberships"> & {
+  user: Doc<"users"> | null;
+};
 
 function formatDate(ts: number) {
   return new Intl.DateTimeFormat("en-US", {
@@ -14,20 +25,18 @@ function formatDate(ts: number) {
   }).format(new Date(ts));
 }
 
-type MemberWithUser = Doc<"memberships"> & {
-  user: Doc<"users"> | null;
-};
-
-export function MembersTab({ members }: { members: MemberWithUser[] }) {
+export function MembersList({
+  members,
+  limit,
+}: {
+  members: MemberWithUser[];
+  limit?: number;
+}) {
   const columns: ColumnDef<MemberWithUser>[] = useMemo(
     () => [
       {
         header: "Name",
         accessorKey: "user.name",
-      },
-      {
-        header: "Email",
-        accessorKey: "user.email",
       },
       {
         header: "Role",
@@ -56,16 +65,25 @@ export function MembersTab({ members }: { members: MemberWithUser[] }) {
 
   if (members.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-2 border border-dashed border-border rounded-xl">
-        <Users className="w-8 h-8 text-muted-foreground/50" />
-        <p className="text-sm font-medium text-foreground">No members yet</p>
-      </div>
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Users />
+          </EmptyMedia>
+          <EmptyTitle>No members yet</EmptyTitle>
+          <EmptyDescription>
+            Members will appear here once they join.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
+  const visible = limit ? members.slice(0, limit) : members;
+
   return (
     <div className="border border-border/50 rounded-xl overflow-hidden">
-      <EntityTable columns={columns} data={members} />
+      <EntityTable columns={columns} data={visible} />
     </div>
   );
 }
