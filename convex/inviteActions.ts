@@ -9,6 +9,8 @@ import { render } from "@react-email/render";
 import { InviteEmail } from "../src/emails/InviteEmail";
 import * as React from "react";
 import { Id } from "./_generated/dataModel";
+import { ACTIONS } from "./constants";
+import { logActivity } from "./activities";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -32,9 +34,8 @@ async function sendInviteEmail(
   const html = await render(
     React.createElement(InviteEmail, { inviterName, communityName, inviteUrl }),
   );
-
   await resend.emails.send({
-    from: "Jamii Save <invites@jamii-save.com>",
+    from: process.env.EMAIL_SENDER_ADDRESS ?? "info@phyntom-io.dev",
     to,
     subject: `${inviterName} invited you to join ${communityName}`,
     html,
@@ -73,6 +74,12 @@ export const sendInvite = action({
 
     const resend = new Resend(process.env.RESEND_API_KEY);
     await sendInviteEmail(resend, email, inviterName, communityName, token);
+    await logActivity(ctx, {
+      communityId,
+      entity: "invite",
+      action: ACTIONS.SENT,
+      metadata: `${inviterName} invited ${email} to join ${communityName}`,
+    });
   },
 });
 

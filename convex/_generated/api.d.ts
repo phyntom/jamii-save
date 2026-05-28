@@ -8,8 +8,10 @@
  * @module
  */
 
+import type * as activities from "../activities.js";
 import type * as auth from "../auth.js";
 import type * as communities from "../communities.js";
+import type * as constants from "../constants.js";
 import type * as error from "../error.js";
 import type * as http from "../http.js";
 import type * as inviteActions from "../inviteActions.js";
@@ -24,8 +26,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  activities: typeof activities;
   auth: typeof auth;
   communities: typeof communities;
+  constants: typeof constants;
   error: typeof error;
   http: typeof http;
   inviteActions: typeof inviteActions;

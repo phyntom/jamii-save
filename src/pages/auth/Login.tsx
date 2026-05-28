@@ -12,9 +12,10 @@ import { Form } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router";
+import { useConvexAuth } from "convex/react";
 import z from "zod";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { toast } from "sonner";
@@ -37,6 +38,14 @@ export default function Login({ provider }: LoginProps) {
   const { signIn } = useAuthActions();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { isAuthenticated } = useConvexAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(searchParams.get("redirect") ?? "/overview", { replace: true });
+    }
+  }, [isAuthenticated]);
+
   const form = useForm<SignInFormType>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -50,20 +59,33 @@ export default function Login({ provider }: LoginProps) {
     setIsLoading(true);
     try {
       await signIn(provider ?? "password", { email, password, flow: "signIn" });
-      navigate(searchParams.get("redirect") ?? "/overview", { replace: true });
     } catch (error) {
       if (error instanceof Error) {
         const msg = error.message;
 
         if (msg.includes("InvalidSecret")) {
+          form.setError("password", { message: "Incorrect password." });
           toast.error("Incorrect password. Please try again.", {
             className: "bg-red-100 text-red-800 border border-red-400",
           });
         } else if (msg.includes("InvalidAccountId")) {
+          form.setError("email", {
+            message: "No account found with this email.",
+          });
           toast.error("No account found with this email.");
         } else if (msg.includes("Invalid credentials")) {
+          form.setError("email", { message: "Incorrect email or password." });
+          form.setError("password", {
+            message: "Incorrect email or password.",
+          });
           toast.error("Incorrect email or password.");
         } else if (msg.includes("TooManyFailedAttempts")) {
+          form.setError("email", {
+            message: "Too many failed attempts. Please wait.",
+          });
+          form.setError("password", {
+            message: "Too many failed attempts. Please wait.",
+          });
           toast.error("Too many failed attempts. Please wait and try again.", {
             className: "bg-red-100 text-red-800 border border-red-400",
           });
@@ -96,7 +118,7 @@ export default function Login({ provider }: LoginProps) {
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSignIn)}>
                   <div className="grid gap-6">
-                    <div className="flex">
+                    <div className="flex gap-4">
                       <SignInWithGoogle />
                       <SignInWithMicrosoft />
                     </div>
@@ -121,6 +143,14 @@ export default function Login({ provider }: LoginProps) {
                           type="password"
                           autoComplete="email webauthn"
                         />
+                        <div className="flex justify-end">
+                          <Link
+                            to="/forgot-password"
+                            className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                          >
+                            Forgot password?
+                          </Link>
+                        </div>
                       </div>
                       <Button
                         type="submit"

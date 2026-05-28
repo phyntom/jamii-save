@@ -53,8 +53,6 @@ export const getMyMembership = query({
       .first();
     if (!community) return null;
 
-    console.log("community", community);
-
     return ctx.db
       .query("memberships")
       .withIndex("communityIdAndUserId", (q) =>
